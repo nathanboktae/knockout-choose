@@ -46,6 +46,20 @@
           throw new Error('You must provide a selected (value) option as an observable, or observableArray for multiple selection')
         }
 
+        if (!componentInfo.element.attributes.tabindex) {
+          componentInfo.element.setAttribute('tabindex', '0')
+        }
+        componentInfo.element.addEventListener('focus', function() {
+          dropdownVisible(true)
+        })
+
+        var closeOnBlur = function(e) {
+          if (!e.relatedTarget || !componentInfo.element.contains(e.relatedTarget)) {
+            dropdownVisible(false)
+          }
+        }
+        componentInfo.element.addEventListener('blur', closeOnBlur)
+
         return {
           searchTerm: searchTerm,
           selected: selected,
@@ -54,6 +68,7 @@
           dropdownVisible: dropdownVisible,
           caption: params.caption || 'Choose...',
           searchPlaceholderText: params.searchPlaceholderText,
+          closeOnBlur: closeOnBlur,
 
           toggleDropdown: function() {
             dropdownVisible(!dropdownVisible())
@@ -98,7 +113,7 @@
     },
     template: '<div class="choose-match" data-bind="template: { nodes: matchTemplate, data: selected }, click: toggleDropdown"></div>\
 <div class="choose-dropdown" data-bind="visible: dropdownVisible">\
-  <div class="choose-search-wrapper" data-bind="visible: showSearch"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholderText }"></div>\
+  <div class="choose-search-wrapper" data-bind="visible: showSearch"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholderText }, event: { blur: closeOnBlur }"></div>\
   <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }"></ul>\
 </div>'
   })
