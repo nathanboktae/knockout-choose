@@ -1,0 +1,35 @@
+{
+  "name": "knockout-chooose",
+  "version": "0.1.0",
+  "description": "A lightweight and powerful select alternative to let users choose items from many options",
+  "main": "choose.js",
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "grunt": "^0.4.5",
+    "grunt-connect": "^0.2.0",
+    "grunt-contrib-connect": "^0.11.2",
+    "grunt-saucelabs": "^8.6.1",
+    "knockout": "^3.3.0",
+    "mocha": "^2.2.5",
+    "mocha-phantomjs": "^3.6.0",
+    "phantomjs": "1.9.7-15",
+    "sinon-browser-only": "^1.12.1",
+    "sinon-chai": "^2.8.0"
+  },
+  "peerDependencies": {
+    "knockout": "^3.2.0"
+  },
+  "scripts": {
+    "test": "mocha-phantomjs tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
+  },
+  "keywords": [
+    "select",
+    "choose",
+    "options",
+    "knockout",
+    "knockout-plugin",
+    "knockout-component"
+  ],
+  "author": "Nathan Black <nathan@nathanblack.org>",
+  "license": "ISC"
+}
