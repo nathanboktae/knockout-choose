@@ -33,8 +33,8 @@
         if (!matchTemplate) {
           matchTemplate = [document.createElement('span')]
           matchTemplate[0].setAttribute('data-bind', params.multiple ?
-              'text: $component.selected().length ? $component.selected().join(", ") : $component.caption' :
-              'text: $component.selected() || $component.caption')
+              'text: $component.selected().length ? $component.selected().join(", ") : $component.placeholder' :
+              'text: $component.selected() != null ? $component.selected() : $component.placeholder')
         }
 
         var
@@ -66,7 +66,7 @@
           itemTemplate: [itemLi],
           matchTemplate: matchTemplate,
           dropdownVisible: dropdownVisible,
-          caption: params.caption || 'Choose...',
+          placeholder: params.placeholder || 'Choose...',
           searchPlaceholderText: params.searchPlaceholderText,
           closeOnBlur: closeOnBlur,
 
@@ -115,6 +115,7 @@
 <div class="choose-dropdown" data-bind="visible: dropdownVisible">\
   <div class="choose-search-wrapper" data-bind="visible: showSearch"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholderText }, event: { blur: closeOnBlur }"></div>\
   <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }"></ul>\
-</div>'
+</div>',
+    synchronous: true
   })
 })
