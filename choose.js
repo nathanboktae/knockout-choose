@@ -24,7 +24,7 @@
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
         } else {
-          itemTemplate = itemTemplate.children
+          itemTemplate = Array.prototype.slice.call(itemTemplate.children)
         }
         itemTemplate.forEach(function(n) {
           itemLi.appendChild(n)
@@ -35,6 +35,8 @@
           matchTemplate[0].setAttribute('data-bind', params.multiple ?
               'text: $component.selected().length ? $component.selected().join(", ") : $component.placeholder' :
               'text: $component.selected() != null ? $component.selected() : $component.placeholder')
+        } else {
+          matchTemplate = Array.prototype.slice.call(matchTemplate.children)
         }
 
         var
@@ -43,7 +45,9 @@
           dropdownVisible = params.dropdownVisible || ko.observable(false)
 
         if (!ko.isObservable(selected)) {
-          throw new Error('You must provide a selected (value) option as an observable, or observableArray for multiple selection')
+          throw new Error('You must provide a selected (value) option as an observable')
+        } else if (params.multiple && typeof selected.push !== 'function') {
+          throw new Error('You must provide a selected (value) option as an observableArray for multiple selection')
         }
 
         if (!componentInfo.element.attributes.tabindex) {
@@ -106,6 +110,7 @@
               idx === -1 ? selected.push(item) : selected.splice(idx, 1)
             } else {
               selected(item)
+              dropdownVisible(false)
             }
           }
         }
