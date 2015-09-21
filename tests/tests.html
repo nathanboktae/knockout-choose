@@ -27,7 +27,7 @@
 
   <script>
     if ('callPhantom' in window) {
-      (window.mochaPhantomJS || mocha).run()
+      mocha.run()
     } else {
       window.onload = function() {
         var runner = mocha.run(),

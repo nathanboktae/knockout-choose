@@ -24,7 +24,7 @@
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
         } else {
-          itemTemplate = Array.prototype.slice.call(itemTemplate.children)
+          itemTemplate = Array.prototype.slice.call(itemTemplate.childNodes)
         }
         itemTemplate.forEach(function(n) {
           itemLi.appendChild(n)
@@ -36,7 +36,7 @@
               'text: $component.selected().length ? $component.selected().join(", ") : $component.placeholder' :
               'text: $component.selected() != null ? $component.selected() : $component.placeholder')
         } else {
-          matchTemplate = Array.prototype.slice.call(matchTemplate.children)
+          matchTemplate = Array.prototype.slice.call(matchTemplate.childNodes)
         }
 
         var

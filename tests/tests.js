@@ -169,6 +169,13 @@ describe('knockout choose', function() {
         ['Bob - 31', 'Jane - 25', 'Anne - 37'])
     })
 
+    it('should support virtual elements for templates', function() {
+      selected(multiple ? [jane, dwane] : jane)
+      testSetup(null, '<choose-match><!-- ko text: ' + (multiple ? "$root.names()" : 'name') + ' --><!-- /ko --></choose-match>')
+
+      matchEl.textContent.should.equal(multiple ? 'Jane, Dwane' : 'Jane')
+    })
+
     !m && it('should update the value when the user chooses new object selections, toggling the dropdown', function() {
       testSetup(null, nameTemplates)
       dropdown.style.display.should.equal('none')
