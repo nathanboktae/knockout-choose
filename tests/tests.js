@@ -176,17 +176,30 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal(multiple ? 'Jane, Dwane' : 'Jane')
     })
 
+    it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
+      testSetup()
+      dropdown.style.display.should.equal('none')
+      matchEl.should.have.class('choose-no-selection')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(2)')
+      matchEl.should.not.have.class('choose-no-selection')
+    })
+
     !m && it('should update the value when the user chooses new object selections, toggling the dropdown', function() {
       testSetup(null, nameTemplates)
       dropdown.style.display.should.equal('none')
+      testEl.should.not.have.class('choose-dropdown-open')
       
       click(matchEl)
       dropdown.style.display.should.equal('')
+      testEl.should.have.class('choose-dropdown-open')
 
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal(jane)
       matchEl.textContent.should.equal('Jane')
       dropdown.style.display.should.equal('none')
+      testEl.should.not.have.class('choose-dropdown-open')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(4)')
@@ -194,5 +207,18 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('Dwane')
     })
   })
+  })
+
+  describe('search', function() {
+    it('by default should only show when there are more than 10 items', function() {
+      testSetup({ options: colors, selected: selected })
+      testEl.querySelector('.choose-search-wrapper').style.display.should.equal('none')
+
+      colors(colors().concat(['pink', 'red', 'blue', 'crimson', 'rebeccapurple', 'iris', 'seagreen', 'pumpkin']))
+      testEl.querySelector('.choose-search-wrapper').style.display.should.equal('')
+    })
+
+    it('should call the showSearch function if provided to determine weather to show the searchbox')
+    it('should filter items to choose from as the user types')
   })
 })

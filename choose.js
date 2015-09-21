@@ -42,7 +42,8 @@
         var
           searchTerm = params.searchTerm || ko.observable(),
           selected = params.selected,
-          dropdownVisible = params.dropdownVisible || ko.observable(false)
+          dropdownVisible = params.dropdownVisible || ko.observable(false),
+          disposables = []
 
         if (!ko.isObservable(selected)) {
           throw new Error('You must provide a selected (value) option as an observable')
@@ -64,6 +65,10 @@
         }
         componentInfo.element.addEventListener('blur', closeOnBlur)
 
+        disposables.push(dropdownVisible.subscribe(function(val) {
+          componentInfo.element.classList.toggle('choose-dropdown-open', val)
+        }))
+
         return {
           searchTerm: searchTerm,
           selected: selected,
@@ -78,10 +83,14 @@
             dropdownVisible(!dropdownVisible())
           },
 
+          hasSelection: function() {
+            return params.multiple ? !!selected().length : !!selected()
+          },
+
           showSearch: function() {
             return 'showSearch' in params ?
-              ko.unwrap(params.showSearch) :
-              ko.unwrap(params.options).length > (params.showSearch || 10)
+              ko.unwrap(params.showSearch)() :
+              ko.unwrap(params.options).length > 10
           },
 
           filteredItems: function() {
@@ -112,13 +121,19 @@
               selected(item)
               dropdownVisible(false)
             }
+          },
+
+          dispose: function() {
+            disposables.forEach(function(d) {
+              d.dispose()
+            })
           }
         }
       }
     },
-    template: '<div class="choose-match" data-bind="template: { nodes: matchTemplate, data: selected }, click: toggleDropdown"></div>\
+    template: '<div class="choose-match" data-bind="template: { nodes: matchTemplate, data: selected }, click: toggleDropdown, css: { \'choose-no-selection\': !hasSelection() }"></div>\
 <div class="choose-dropdown" data-bind="visible: dropdownVisible">\
-  <div class="choose-search-wrapper" data-bind="visible: showSearch"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholderText }, event: { blur: closeOnBlur }"></div>\
+  <div class="choose-search-wrapper" data-bind="visible: showSearch()"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholderText }, event: { blur: closeOnBlur }"></div>\
   <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }"></ul>\
 </div>',
     synchronous: true
