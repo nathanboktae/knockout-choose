@@ -1,5 +1,5 @@
 describe('knockout choose', function() {
-  var testEl, matchEl, dropdown, multiple,
+  var testEl, matchEl, dropdown, multiple, clock,
   people, nameTemplates, colors, selected, jane, dwane,
   testSetup = function(params, viewModel, innerHTML) {
     if (typeof params !== 'string') {
@@ -34,6 +34,15 @@ describe('knockout choose', function() {
     if (typeof el === 'string') {
       el = document.querySelector(el)
     }
+    el.dispatchEvent(evt)
+  },
+  type = function(el, chars) {
+    var evt = document.createEvent('KeyboardEvent')
+    evt.initEvent('keydown', true, true)
+    if (typeof el === 'string') {
+      el = document.querySelector(el)
+    }
+    el.value = chars
     el.dispatchEvent(evt)
   },
   textNodesFor = function(selector) {
@@ -86,6 +95,7 @@ describe('knockout choose', function() {
   afterEach(function() {
     testEl && document.body.removeChild(testEl)
     testEl = null
+    clock && clock.restore()
   });
 
   [false, true].forEach(function(m) {
@@ -210,15 +220,64 @@ describe('knockout choose', function() {
   })
 
   describe('search', function() {
+    var searchbox, searchWrapper,
+    searchTestSetup = function() {
+      testSetup.apply(null, arguments)
+      searchWrapper = testEl.querySelector('.choose-search-wrapper')
+      searchbox = testEl.querySelector('.choose-search-wrapper input')
+    }
     it('by default should only show when there are more than 10 items', function() {
-      testSetup({ options: colors, selected: selected })
-      testEl.querySelector('.choose-search-wrapper').style.display.should.equal('none')
+      searchTestSetup({ options: colors, selected: selected })
+      searchWrapper.style.display.should.equal('none')
 
       colors(colors().concat(['pink', 'red', 'blue', 'crimson', 'rebeccapurple', 'iris', 'seagreen', 'pumpkin']))
-      testEl.querySelector('.choose-search-wrapper').style.display.should.equal('')
+      searchWrapper.style.display.should.equal('')
     })
 
-    it('should call the showSearch function if provided to determine weather to show the searchbox')
-    it('should filter items to choose from as the user types')
+    it('should call the showSearch function if provided to determine weather to show the searchbox', function() {
+      var showSearch = sinon.spy(function() {
+        return colors().length > 5
+      })
+      searchTestSetup('options: options, selected: selected, showSearch: showSearch', {
+        options: colors,
+        selected: selected,
+        showSearch: showSearch
+      })
+      showSearch.should.have.been.calledOnce
+      searchWrapper.style.display.should.equal('none')
+
+      colors(colors().concat(['pink', 'red', 'blue']))
+      showSearch.should.have.been.calledTwice
+      searchWrapper.style.display.should.equal('')
+    })
+
+    it('should filter scalar items to choose from as the user types', function() {
+      clock = sinon.useFakeTimers()
+      searchTestSetup({ options: colors, selected: selected })
+      click(matchEl)
+      type(searchbox, 'b')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown li').should.deep.equal(['blue', 'brown'])
+    })
+
+    it('should filter object items by searching properties defined in searchProps', function() {
+      clock = sinon.useFakeTimers()
+      searchTestSetup('options: options, selected: selected, searchProps: ["name"]', {
+        options: people,
+        selected: selected
+      }, nameTemplates)
+
+      click(matchEl)
+      type(searchbox, 'an')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown li').should.deep.equal(['Jane - 25', 'Anne - 37', 'Dwane - 21'])
+
+      type(searchbox, '2')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown li').should.be.empty
+    })
   })
 })
