@@ -47,9 +47,9 @@
           lastFocusedAt = new Date(1, 1, 1980)
 
         if (!ko.isObservable(selected)) {
-          throw new Error('You must provide a selected (value) option as an observable')
+          throw new Error('You must provide a `selected` (value) option as an observable')
         } else if (params.multiple && typeof selected.push !== 'function') {
-          throw new Error('You must provide a selected (value) option as an observableArray for multiple selection')
+          throw new Error('You must provide a `selected` (value) option as an observableArray for multiple selection')
         }
 
         if (!componentInfo.element.attributes.tabindex) {
@@ -68,8 +68,17 @@
         componentInfo.element.addEventListener('blur', closeOnBlur)
 
         disposables.push(dropdownVisible.subscribe(function(val) {
-          componentInfo.element.classList.toggle('choose-dropdown-open', val)
+          if (val) {
+            componentInfo.element.classList.add('choose-dropdown-open')
+            componentInfo.element.classList.remove('choose-dropdown-closing')
+          } else {
+            componentInfo.element.classList.add('choose-dropdown-closing')
+          }
         }))
+        componentInfo.element.addEventListener('animationend', function() {
+          componentInfo.element.classList.remove('choose-dropdown-closing')
+          componentInfo.element.classList.toggle('choose-dropdown-open', dropdownVisible())
+        })
 
         return {
           searchTerm: searchTerm,

@@ -142,7 +142,7 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('blue')
     })
 
-    !m && it('should update the value when the user chooses new scalar selections, toggling the dropdown', function() {
+    !m && it('should update the value when the user chooses new scalar selections, updating dropdown classes', function() {
       testSetup({ selected: selected, options: colors })
       testEl.should.not.have.class('choose-dropdown-open')
       
@@ -152,12 +152,37 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal('brown')
       matchEl.textContent.should.equal('brown')
-      testEl.should.not.have.class('choose-dropdown-open')
+      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(1)')
       selected().should.equal('blue')
       matchEl.textContent.should.equal('blue')
+    })
+
+    window.requestAnimationFrame && it('should remove dropdown open and closing classes after an animation ends', function(done) {
+      document.styleSheets[0].insertRule(
+      '@keyframes slideup {\
+        0% { transform: translateY(0); }\
+        100% { transform: translateY(-20%); }\
+      }', 1);
+      document.styleSheets[0].insertRule('.choose-dropdown-closing { color: blue; animation: slideup 30ms linear; }', 1);
+      testSetup({ selected: selected, options: colors })
+      testEl.should.not.have.class('choose-dropdown-open')
+      testEl.should.not.have.class('choose-dropdown-closing')
+
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+      testEl.should.not.have.class('choose-dropdown-closing')
+
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
+      setTimeout(function() {
+        document.styleSheets[0].deleteRule(1)
+        testEl.should.not.have.class('choose-dropdown-open')
+        testEl.should.not.have.class('choose-dropdown-closing')
+        done()
+      }, 75)
     })
 
     it('should provide some default templates if none are specified', function() {
@@ -195,7 +220,7 @@ describe('knockout choose', function() {
       matchEl.should.not.have.class('choose-no-selection')
     })
 
-    !m && it('should update the value when the user chooses new object selections, toggling the dropdown', function() {
+    !m && it('should update the value when the user chooses new object selections, updating dropdown classes', function() {
       testSetup(null, nameTemplates)
       testEl.should.not.have.class('choose-dropdown-open')
       
@@ -205,7 +230,7 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal(jane)
       matchEl.textContent.should.equal('Jane')
-      testEl.should.not.have.class('choose-dropdown-open')
+      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(4)')
