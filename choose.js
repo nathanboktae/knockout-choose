@@ -136,7 +136,7 @@
       }
     },
     template: '<div class="choose-match" data-bind="template: { nodes: matchTemplate, data: selected }, click: toggleDropdown, css: { \'choose-no-selection\': !hasSelection() }"></div>\
-<div class="choose-dropdown" data-bind="visible: dropdownVisible">\
+<div class="choose-dropdown">\
   <div class="choose-search-wrapper" data-bind="visible: showSearch()"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholder }, event: { blur: closeOnBlur }"></div>\
   <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }"></ul>\
 </div>',

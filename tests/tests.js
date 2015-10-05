@@ -144,15 +144,15 @@ describe('knockout choose', function() {
 
     !m && it('should update the value when the user chooses new scalar selections, toggling the dropdown', function() {
       testSetup({ selected: selected, options: colors })
-      dropdown.style.display.should.equal('none')
+      testEl.should.not.have.class('choose-dropdown-open')
       
       click(matchEl)
-      dropdown.style.display.should.equal('')
+      testEl.should.have.class('choose-dropdown-open')
 
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal('brown')
       matchEl.textContent.should.equal('brown')
-      dropdown.style.display.should.equal('none')
+      testEl.should.not.have.class('choose-dropdown-open')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(1)')
@@ -188,7 +188,6 @@ describe('knockout choose', function() {
 
     it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
       testSetup()
-      dropdown.style.display.should.equal('none')
       matchEl.should.have.class('choose-no-selection')
 
       click(matchEl)
@@ -198,17 +197,14 @@ describe('knockout choose', function() {
 
     !m && it('should update the value when the user chooses new object selections, toggling the dropdown', function() {
       testSetup(null, nameTemplates)
-      dropdown.style.display.should.equal('none')
       testEl.should.not.have.class('choose-dropdown-open')
       
       click(matchEl)
-      dropdown.style.display.should.equal('')
       testEl.should.have.class('choose-dropdown-open')
 
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal(jane)
       matchEl.textContent.should.equal('Jane')
-      dropdown.style.display.should.equal('none')
       testEl.should.not.have.class('choose-dropdown-open')
 
       click(matchEl)
