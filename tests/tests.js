@@ -17,6 +17,11 @@ describe('knockout choose', function() {
           return i.name
         }).join(', ')
       }
+      viewModel.namesAndAges = function(s) {
+        return s().map(function(i) {
+          return i.name + ' - ' + i.age
+        }).join(', ')
+      }
     }
 
     testEl = document.createElement('choose')
@@ -113,7 +118,7 @@ describe('knockout choose', function() {
 
     xit('should render and update the list of string options when an observable is behind a property', function() {
       var viewModel = { selected: selected }
-      
+
       Object.defineProperty(viewModel, 'options', {
         get: colors,
         set: colors,
@@ -145,7 +150,7 @@ describe('knockout choose', function() {
     !m && it('should update the value when the user chooses new scalar selections, updating dropdown classes', function() {
       testSetup({ selected: selected, options: colors })
       testEl.should.not.have.class('choose-dropdown-open')
-      
+
       click(matchEl)
       testEl.should.have.class('choose-dropdown-open')
 
@@ -158,6 +163,41 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(1)')
       selected().should.equal('blue')
       matchEl.textContent.should.equal('blue')
+    })
+
+    !m && it('should update the value to the property of selectProperty if specified', function() {
+      testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
+        '<choose-match><span data-bind="text: $data ? $data.name + \' - \' + $data.age : \'nobody\'"></span></choose-match>\
+        <choose-item><span data-bind="text: name + \' - \' + age"></span></choose-item>')
+      click(matchEl)
+      textNodesFor('.choose-dropdown ul li').slice(0,3).should.deep.equal(
+        ['Bob - 31', 'Jane - 25', 'Anne - 37'])
+
+      click('.choose-dropdown li:nth-child(2)')
+      selected().should.equal('Jane')
+      matchEl.textContent.should.equal('Jane - 25')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(1)')
+      selected().should.equal('Bob')
+      matchEl.textContent.should.equal('Bob - 31')
+    })
+
+    m && it('should update the value to an array of properties of selectProperty if specified', function() {
+      testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
+        '<choose-match><span data-bind="text: $root.namesAndAges($component.selected)"></span></choose-match>\
+        <choose-item><span data-bind="text: name + \' - \' + age"></span></choose-item>')
+      click(matchEl)
+      textNodesFor('.choose-dropdown ul li').slice(0,3).should.deep.equal(
+        ['Bob - 31', 'Jane - 25', 'Anne - 37'])
+
+      click('.choose-dropdown li:nth-child(2)')
+      selected().should.deep.equal(['Jane'])
+      matchEl.textContent.should.equal('Jane - 25')
+
+      click('.choose-dropdown li:nth-child(1)')
+      selected().should.deep.equal(['Jane', 'Bob'])
+      matchEl.textContent.should.equal('Jane - 25, Bob - 31')
     })
 
     window.requestAnimationFrame && it('should remove dropdown open and closing classes after an animation ends', function(done) {
@@ -223,7 +263,7 @@ describe('knockout choose', function() {
     !m && it('should update the value when the user chooses new object selections, updating dropdown classes', function() {
       testSetup(null, nameTemplates)
       testEl.should.not.have.class('choose-dropdown-open')
-      
+
       click(matchEl)
       testEl.should.have.class('choose-dropdown-open')
 

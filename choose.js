@@ -41,13 +41,13 @@
 
         var
           searchTerm = params.searchTerm || ko.observable(),
-          selected = params.selected,
+          selected = params.selectProperty ? ko[params.multiple ? 'observableArray' : 'observable']() : params.selected,
           dropdownVisible = params.dropdownVisible || ko.observable(false),
           disposables = [],
           lastFocusedAt = new Date(1, 1, 1980)
 
-        if (!ko.isObservable(selected)) {
-          throw new Error('You must provide a `selected` (value) option as an observable')
+        if (!ko.isWritableObservable(params.selected)) {
+          throw new Error('You must provide a `selected` (value) option as a writable observable')
         } else if (params.multiple && typeof selected.push !== 'function') {
           throw new Error('You must provide a `selected` (value) option as an observableArray for multiple selection')
         }
@@ -130,8 +130,14 @@
             if (params.multiple) {
               var idx = selected().indexOf(item)
               idx === -1 ? selected.push(item) : selected.splice(idx, 1)
+              if (params.selectProperty) {
+                params.selected(selected().map(function(i) { return i[params.selectProperty] }))
+              }
             } else {
               selected(item)
+              if (params.selectProperty) {
+                params.selected(item[params.selectProperty])
+              }
               dropdownVisible(false)
             }
           },
