@@ -26,6 +26,47 @@
         } else {
           itemTemplate = Array.prototype.slice.call(itemTemplate.childNodes)
         }
+
+        if (!Array.isArray(ko.unwrap(params.options))) {
+          var groupHeaderTemplate = componentInfo.templateNodes.filter(function(n) {
+            return n.tagName === 'CHOOSE-GROUP-HEADER'
+          })[0]
+
+          if (!groupHeaderTemplate) {
+            groupHeaderTemplate = [document.createElement('span')]
+            groupHeaderTemplate[0].setAttribute('data-bind', 'text: $data.group')
+            groupHeaderTemplate[0].className = 'choose-group-header'
+          } else {
+            groupHeaderTemplate = Array.prototype.slice.call(groupHeaderTemplate.childNodes)
+          }
+
+          var outerLi = document.createElement('li'),
+              groupUl = document.createElement('ul')
+          groupUl.className = 'choose-group'
+          groupUl.setAttribute('data-bind', 'foreach: $data.items()')
+          groupUl.appendChild(itemLi)
+
+          groupHeaderTemplate.forEach(function(n) {
+            outerLi.appendChild(n)
+          })
+          outerLi.appendChild(groupUl)
+
+          var options = ko.computed(function() {
+            var groupedOptions = ko.unwrap(params.$raw.options()) || {}
+            return Object.keys(groupedOptions).map(function(groupName) {
+              return {
+                group: groupName,
+                // we're returning a function here to have more granular dependency chains
+                items: function() { return ko.unwrap(groupedOptions[groupName]) }
+              }
+            })
+          }, null, { disposeWhenNodeIsRemoved: componentInfo.element })
+        } else {
+          options = function() {
+            return ko.unwrap(params.$raw.options()) || []
+          }
+        }
+
         itemTemplate.forEach(function(n) {
           itemLi.appendChild(n)
         })
@@ -83,7 +124,7 @@
         return {
           searchTerm: searchTerm,
           selected: selected,
-          itemTemplate: [itemLi],
+          itemTemplate: [outerLi || itemLi],
           matchTemplate: matchTemplate,
           dropdownVisible: dropdownVisible,
           placeholder: params.placeholder || 'Choose...',
@@ -103,11 +144,11 @@
           showSearch: function() {
             return 'showSearch' in params ?
               ko.unwrap(params.showSearch)() :
-              ko.unwrap(params.$raw.options()).length > 10
+              options().length > 10
           },
 
           filteredItems: function() {
-            var items = ko.unwrap(params.$raw.options())
+            var items = options()
             if (!searchTerm()) return items
 
             var searchTermUC = searchTerm().toUpperCase(),

@@ -286,6 +286,116 @@ describe('knockout choose', function() {
   })
   })
 
+  describe('groups', function() {
+    it('should render an object of scalar arrays as groups with default templates', function() {
+      testSetup({
+        options: {
+          pastels: ['pink', 'mauve', 'baby blue'],
+          earth: ['copper', 'brown', 'citron'],
+          vibrant: ['cyan']
+        },
+        selected: selected
+      })
+
+      textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
+        .should.deep.equal(['pastels', 'earth', 'vibrant'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['pink', 'mauve', 'baby blue'])
+      textNodesFor('.choose-dropdown > ul > li:nth-child(2) ul.choose-group span')
+        .should.deep.equal(['copper', 'brown', 'citron'])
+      textNodesFor('.choose-dropdown > ul > li:last-child ul.choose-group span')
+        .should.deep.equal(['cyan'])
+    })
+
+    it('should should single select a sub item', function() {
+      testSetup({
+        options: {
+          pastels: ['pink', 'mauve', 'baby blue'],
+          earth: ['copper', 'brown', 'citron'],
+        },
+        selected: selected
+      })
+
+      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      selected().should.equal('mauve')
+      testEl.querySelector('.choose-match span').textContent.should.equal('mauve')
+
+      click('.choose-dropdown > ul > li:nth-child(2) ul.choose-group li:last-child')
+      selected().should.equal('citron')
+      testEl.querySelector('.choose-match span').textContent.should.equal('citron')
+    })
+
+    it('should do nothing when clicking a group header', function() {
+      testSetup({
+        options: {
+          pastels: ['pink', 'mauve', 'baby blue'],
+          earth: ['copper', 'brown', 'citron'],
+        },
+        selected: selected
+      })
+
+      click('.choose-dropdown > ul > li:first-child .choose-group-header')
+      should.not.exist(selected())
+
+      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      click(matchEl)
+      click('.choose-dropdown > ul > li:first-child .choose-group-header')
+      testEl.should.have.class('choose-dropdown-open')
+    })
+
+    it('should render an object of object arrays as groups given templates', function() {
+      testSetup({
+        options: {
+          managers: [{
+            name: 'Tom',
+            age: 25,
+            eyeColor: 'brown'
+          }, {
+            name: 'Tori',
+            age: 27,
+            eyeColor: 'brown'
+          }],
+          employees: [dwane, jane],
+        },
+        selected: selected
+      }, '<choose-match><span data-bind="text: $data && $data.name"></span></choose-match>\
+      <choose-group-header><h3 data-bind="text: $data.group"></h3></choose-group-header>\
+      <choose-item><span data-bind="text: $data.name.toLowerCase()"></span></choose-item>')
+
+      textNodesFor('.choose-dropdown > ul > li h3')
+        .should.deep.equal(['managers', 'employees'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['tom', 'tori'])
+      textNodesFor('.choose-dropdown > ul > li:last-child ul.choose-group span')
+        .should.deep.equal(['dwane', 'jane'])
+    })
+
+    it('should select multiple items from different groups', function() {
+      selected = ko.observableArray()
+      testSetup('options: options, selected: selected, multiple: true', {
+        options: {
+          managers: [{
+            name: 'Tom',
+            age: 25,
+            eyeColor: 'brown'
+          }, {
+            name: 'Tori',
+            age: 27,
+            eyeColor: 'brown'
+          }],
+          employees: [dwane, jane],
+        },
+        selected: selected
+      }, nameTemplates)
+
+      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      selected()[0].name.should.equal('Tori')
+
+      click('.choose-dropdown > ul > li:nth-child(2) ul.choose-group li:last-child')
+      selected().map(function(i) { return i.name }).should.deep.equal(['Tori', 'Jane'])
+    })
+  })
+
   describe('search', function() {
     var searchbox, searchWrapper,
     searchTestSetup = function() {
@@ -346,5 +456,8 @@ describe('knockout choose', function() {
 
       textNodesFor('.choose-dropdown li').should.be.empty
     })
+
+    it('should search items in groups')
+    it('should not show groups without any matches')
   })
 })
