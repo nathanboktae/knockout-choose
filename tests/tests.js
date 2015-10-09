@@ -289,16 +289,41 @@ describe('knockout choose', function() {
   })
   })
 
+  function groupedColorsTest() {
+    testSetup('options: options, selected: selected, showSearch: true', {
+      options: {
+        pastels: ['pink', 'mauve', 'baby blue'],
+        earth: ['copper', 'brown', 'citron'],
+        vibrant: ['cyan']
+      },
+      selected: selected
+    })
+  }
+
+  function groupedPeopleTest() {
+    selected = ko.observableArray()
+    testSetup('options: options, selected: selected, showSearch: true, searchProps: [\'name\', \'eyeColor\'], multiple: true', {
+      options: {
+        managers: [{
+          name: 'Tom',
+          age: 25,
+          eyeColor: 'brown'
+        }, {
+          name: 'Tori',
+          age: 27,
+          eyeColor: 'blue'
+        }],
+        employees: [dwane, jane],
+      },
+      selected: selected
+    }, '<choose-match><span data-bind="text: $data && $data.name"></span></choose-match>\
+    <choose-group-header><h3 data-bind="text: $data.group"></h3></choose-group-header>\
+    <choose-item><span data-bind="text: $data.name.toLowerCase()"></span></choose-item>')
+  }
+
   describe('groups', function() {
     it('should render an object of scalar arrays as groups with default templates', function() {
-      testSetup({
-        options: {
-          pastels: ['pink', 'mauve', 'baby blue'],
-          earth: ['copper', 'brown', 'citron'],
-          vibrant: ['cyan']
-        },
-        selected: selected
-      })
+      groupedColorsTest()
 
       textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
         .should.deep.equal(['pastels', 'earth', 'vibrant'])
@@ -311,13 +336,7 @@ describe('knockout choose', function() {
     })
 
     it('should should single select a sub item', function() {
-      testSetup({
-        options: {
-          pastels: ['pink', 'mauve', 'baby blue'],
-          earth: ['copper', 'brown', 'citron'],
-        },
-        selected: selected
-      })
+      groupedColorsTest()
 
       click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
       selected().should.equal('mauve')
@@ -329,13 +348,7 @@ describe('knockout choose', function() {
     })
 
     it('should do nothing when clicking a group header', function() {
-      testSetup({
-        options: {
-          pastels: ['pink', 'mauve', 'baby blue'],
-          earth: ['copper', 'brown', 'citron'],
-        },
-        selected: selected
-      })
+      groupedColorsTest()
 
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
       should.not.exist(selected())
@@ -347,23 +360,7 @@ describe('knockout choose', function() {
     })
 
     it('should render an object of object arrays as groups given templates', function() {
-      testSetup({
-        options: {
-          managers: [{
-            name: 'Tom',
-            age: 25,
-            eyeColor: 'brown'
-          }, {
-            name: 'Tori',
-            age: 27,
-            eyeColor: 'brown'
-          }],
-          employees: [dwane, jane],
-        },
-        selected: selected
-      }, '<choose-match><span data-bind="text: $data && $data.name"></span></choose-match>\
-      <choose-group-header><h3 data-bind="text: $data.group"></h3></choose-group-header>\
-      <choose-item><span data-bind="text: $data.name.toLowerCase()"></span></choose-item>')
+      groupedPeopleTest()
 
       textNodesFor('.choose-dropdown > ul > li h3')
         .should.deep.equal(['managers', 'employees'])
@@ -374,22 +371,7 @@ describe('knockout choose', function() {
     })
 
     it('should select multiple items from different groups', function() {
-      selected = ko.observableArray()
-      testSetup('options: options, selected: selected, multiple: true', {
-        options: {
-          managers: [{
-            name: 'Tom',
-            age: 25,
-            eyeColor: 'brown'
-          }, {
-            name: 'Tori',
-            age: 27,
-            eyeColor: 'brown'
-          }],
-          employees: [dwane, jane],
-        },
-        selected: selected
-      }, nameTemplates)
+      groupedPeopleTest()
 
       click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
       selected()[0].name.should.equal('Tori')
@@ -412,6 +394,19 @@ describe('knockout choose', function() {
 
       colors(colors().concat(['pink', 'red', 'blue', 'crimson', 'rebeccapurple', 'iris', 'seagreen', 'pumpkin']))
       searchWrapper.style.display.should.equal('')
+    })
+
+    it('should allow showSearch to be an observable', function() {
+      var showSearch = ko.observable('yup')
+      searchTestSetup('options: options, selected: selected, showSearch: showSearch', {
+        options: colors,
+        selected: selected,
+        showSearch: showSearch
+      })
+      searchWrapper.style.display.should.equal('')
+
+      showSearch(false)
+      searchWrapper.style.display.should.equal('none')
     })
 
     it('should call the showSearch function if provided to determine weather to show the searchbox', function() {
@@ -460,7 +455,47 @@ describe('knockout choose', function() {
       textNodesFor('.choose-dropdown li').should.be.empty
     })
 
-    it('should search items in groups')
-    it('should not show groups without any matches')
+    it('should fiter scalar items in groups by the search term, excluding groups without matches', function() {
+      clock = sinon.useFakeTimers()
+      groupedColorsTest()
+      type(testEl.querySelector('.choose-search-wrapper input'), 'r')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
+        .should.deep.equal(['earth'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['copper', 'brown', 'citron'])
+
+      type(testEl.querySelector('.choose-search-wrapper input'), 'v')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
+        .should.deep.equal(['pastels'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['mauve'])
+    })
+
+    it('should fiter object items in groups by the search term, excluding groups without matches', function() {
+      clock = sinon.useFakeTimers()
+      groupedPeopleTest()
+
+      type(testEl.querySelector('.choose-search-wrapper input'), 'blue')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown > ul > li h3')
+        .should.deep.equal(['managers', 'employees'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['tori'])
+      textNodesFor('.choose-dropdown > ul > li:nth-child(2) ul.choose-group span')
+        .should.deep.equal(['jane'])
+
+      type(testEl.querySelector('.choose-search-wrapper input'), 'To')
+      clock.tick(5)
+
+      textNodesFor('.choose-dropdown > ul > li h3')
+        .should.deep.equal(['managers'])
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+        .should.deep.equal(['tom', 'tori'])
+    })
   })
 })

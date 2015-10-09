@@ -142,9 +142,12 @@
           },
 
           showSearch: function() {
-            return 'showSearch' in params ?
-              ko.unwrap(params.showSearch)() :
-              options().length > 10
+            if ('showSearch' in params) {
+              var show = ko.unwrap(params.showSearch)
+              return typeof show === 'function' ? show() : !!show
+            } else {
+              return options().length > 10
+            }
           },
 
           filteredItems: function() {
@@ -152,21 +155,31 @@
             if (!searchTerm()) return items
 
             var searchTermUC = searchTerm().toUpperCase(),
-                searchProps = ko.unwrap(params.searchProps)
+                searchProps = ko.unwrap(params.searchProps),
 
-            if (searchProps) {
-              if (!Array.isArray(searchProps)) {
-                searchProps = [searchProps]
-              }
-              return items.filter(function(i) {
+            predicate = searchProps ?
+              function(i) {
                 return searchProps.some(function(prop) {
                   return i && i[prop] != null && i[prop].toString().toUpperCase().indexOf(searchTermUC) !== -1
                 })
-              })
-            } else {
-              return items.filter(function(i) {
+              }
+            :
+              function(i) {
                 return i != null && i.toString().toUpperCase().indexOf(searchTermUC) !== -1
-              })
+              }
+
+            if (groupUl) {
+              return items.map(function(group) {
+                var filteredChildren = group.items().filter(predicate)
+                if (filteredChildren.length) {
+                  return {
+                    group: group.group,
+                    items: function() { return filteredChildren }
+                  }
+                }
+              }).filter(function(g) { return !!g })
+            } else {
+              return items.filter(predicate)
             }
           },
 
