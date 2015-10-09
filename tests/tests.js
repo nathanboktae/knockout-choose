@@ -116,7 +116,7 @@ describe('knockout choose', function() {
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red', 'pink'])
     })
 
-    xit('should render and update the list of string options when an observable is behind a property', function() {
+    it('should render and update the list of string options when an observable is behind a property', function() {
       var viewModel = { selected: selected }
 
       Object.defineProperty(viewModel, 'options', {
@@ -127,7 +127,7 @@ describe('knockout choose', function() {
       testSetup(viewModel)
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red'])
 
-      viewModel.options.push('pink')
+      colors.push('pink')
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red', 'pink'])
     })
 

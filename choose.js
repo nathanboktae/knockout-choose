@@ -103,11 +103,11 @@
           showSearch: function() {
             return 'showSearch' in params ?
               ko.unwrap(params.showSearch)() :
-              ko.unwrap(params.options).length > 10
+              ko.unwrap(params.$raw.options()).length > 10
           },
 
           filteredItems: function() {
-            var items = ko.unwrap(params.options)
+            var items = ko.unwrap(params.$raw.options())
             if (!searchTerm()) return items
 
             var searchTermUC = searchTerm().toUpperCase(),
