@@ -114,6 +114,9 @@
                 searchProps = ko.unwrap(params.searchProps)
 
             if (searchProps) {
+              if (!Array.isArray(searchProps)) {
+                searchProps = [searchProps]
+              }
               return items.filter(function(i) {
                 return searchProps.some(function(prop) {
                   return i && i[prop] != null && i[prop].toString().toUpperCase().indexOf(searchTermUC) !== -1

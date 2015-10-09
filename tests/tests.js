@@ -201,12 +201,18 @@ describe('knockout choose', function() {
     })
 
     window.requestAnimationFrame && it('should remove dropdown open and closing classes after an animation ends', function(done) {
-      document.styleSheets[0].insertRule(
-      '@keyframes fade {\
-        0% { opacity: 1; }\
-        100% { opacity: 0; }\
-      }', 1);
-      document.styleSheets[0].insertRule('.choose-dropdown-closing { color: blue; animation: fade 30ms linear; }', 1);
+      try {
+        document.styleSheets[0].insertRule(
+        '@keyframes fade {\
+          0% { opacity: 1; }\
+          100% { opacity: 0; }\
+        }', 1);
+      } catch(e) {
+        done() // some browser that doesn't support keyframes
+        return
+      }
+
+      document.styleSheets[0].insertRule('.choose-dropdown-closing { color: blue; animation: fade 20ms linear; }', 1);
       testSetup({ selected: selected, options: colors })
       testEl.should.not.have.class('choose-dropdown-open')
       testEl.should.not.have.class('choose-dropdown-closing')
@@ -222,7 +228,7 @@ describe('knockout choose', function() {
         testEl.should.not.have.class('choose-dropdown-open')
         testEl.should.not.have.class('choose-dropdown-closing')
         done()
-      }, 75)
+      }, 200)
     })
 
     it('should provide some default templates if none are specified', function() {
