@@ -108,6 +108,9 @@ describe('knockout choose', function() {
     before(function() {
       multiple = m
     })
+    after(function() {
+      multiple = false
+    })
     it('should render and update the list of string options given an observableArray', function() {
       testSetup({ options: colors, selected: selected })
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red'])
