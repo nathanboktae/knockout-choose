@@ -325,24 +325,24 @@ describe('knockout choose', function() {
     it('should render an object of scalar arrays as groups with default templates', function() {
       groupedColorsTest()
 
-      textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
+      textNodesFor('.choose-dropdown > ul.choose-group > li span.choose-group-header')
         .should.deep.equal(['pastels', 'earth', 'vibrant'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul.choose-group > li:first-child ul.choose-items span')
         .should.deep.equal(['pink', 'mauve', 'baby blue'])
-      textNodesFor('.choose-dropdown > ul > li:nth-child(2) ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul.choose-group > li:nth-child(2) ul.choose-items span')
         .should.deep.equal(['copper', 'brown', 'citron'])
-      textNodesFor('.choose-dropdown > ul > li:last-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul.choose-group > li:last-child ul.choose-items span')
         .should.deep.equal(['cyan'])
     })
 
     it('should should single select a sub item', function() {
       groupedColorsTest()
 
-      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      click('.choose-dropdown li:first-child ul.choose-items li:nth-child(2)')
       selected().should.equal('mauve')
       testEl.querySelector('.choose-match span').textContent.should.equal('mauve')
 
-      click('.choose-dropdown > ul > li:nth-child(2) ul.choose-group li:last-child')
+      click('.choose-dropdown li:nth-child(2) ul.choose-items li:last-child')
       selected().should.equal('citron')
       testEl.querySelector('.choose-match span').textContent.should.equal('citron')
     })
@@ -353,7 +353,7 @@ describe('knockout choose', function() {
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
       should.not.exist(selected())
 
-      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      click('.choose-dropdown li:first-child ul.choose-items li:nth-child(2)')
       click(matchEl)
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
       testEl.should.have.class('choose-dropdown-open')
@@ -364,19 +364,19 @@ describe('knockout choose', function() {
 
       textNodesFor('.choose-dropdown > ul > li h3')
         .should.deep.equal(['managers', 'employees'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown li:first-child ul.choose-items span')
         .should.deep.equal(['tom', 'tori'])
-      textNodesFor('.choose-dropdown > ul > li:last-child ul.choose-group span')
+      textNodesFor('.choose-dropdown li:last-child ul.choose-items span')
         .should.deep.equal(['dwane', 'jane'])
     })
 
     it('should select multiple items from different groups', function() {
       groupedPeopleTest()
 
-      click('.choose-dropdown > ul > li:first-child ul.choose-group li:nth-child(2)')
+      click('.choose-dropdown li:first-child ul.choose-items li:nth-child(2)')
       selected()[0].name.should.equal('Tori')
 
-      click('.choose-dropdown > ul > li:nth-child(2) ul.choose-group li:last-child')
+      click('.choose-dropdown li:nth-child(2) ul.choose-items li:last-child')
       selected().map(function(i) { return i.name }).should.deep.equal(['Tori', 'Jane'])
     })
   })
@@ -388,11 +388,30 @@ describe('knockout choose', function() {
       searchWrapper = testEl.querySelector('.choose-search-wrapper')
       searchbox = testEl.querySelector('.choose-search-wrapper input')
     }
+
     it('by default should only show when there are more than 10 items', function() {
       searchTestSetup({ options: colors, selected: selected })
       searchWrapper.style.display.should.equal('none')
 
       colors(colors().concat(['pink', 'red', 'blue', 'crimson', 'rebeccapurple', 'iris', 'seagreen', 'pumpkin']))
+      searchWrapper.style.display.should.equal('')
+    })
+
+    it('by default should only show when there are more than 10 items in all groups', function() {
+      var options = ko.observable({
+        one: ['a', 'b', 'c'],
+        two: ['n', 'm', 'o']
+      })
+      searchTestSetup({
+        options: options,
+        selected: selected
+      })
+      searchWrapper.style.display.should.equal('none')
+
+      options({
+        one: ['a', 'b', 'c', 'd', 'e', 'f'],
+        two: ['n', 'm', 'o', 'p', 'q', 'r']
+      })
       searchWrapper.style.display.should.equal('')
     })
 
@@ -461,9 +480,9 @@ describe('knockout choose', function() {
       type(testEl.querySelector('.choose-search-wrapper input'), 'r')
       clock.tick(5)
 
-      textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
+      textNodesFor('.choose-dropdown > ul.choose-group > li span.choose-group-header')
         .should.deep.equal(['earth'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-items span')
         .should.deep.equal(['copper', 'brown', 'citron'])
 
       type(testEl.querySelector('.choose-search-wrapper input'), 'v')
@@ -471,7 +490,7 @@ describe('knockout choose', function() {
 
       textNodesFor('.choose-dropdown > ul > li span.choose-group-header')
         .should.deep.equal(['pastels'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-items span')
         .should.deep.equal(['mauve'])
     })
 
@@ -482,11 +501,11 @@ describe('knockout choose', function() {
       type(testEl.querySelector('.choose-search-wrapper input'), 'blue')
       clock.tick(5)
 
-      textNodesFor('.choose-dropdown > ul > li h3')
+      textNodesFor('.choose-dropdown > ul.choose-group > li h3')
         .should.deep.equal(['managers', 'employees'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-items span')
         .should.deep.equal(['tori'])
-      textNodesFor('.choose-dropdown > ul > li:nth-child(2) ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul > li:nth-child(2) ul.choose-items span')
         .should.deep.equal(['jane'])
 
       type(testEl.querySelector('.choose-search-wrapper input'), 'To')
@@ -494,7 +513,7 @@ describe('knockout choose', function() {
 
       textNodesFor('.choose-dropdown > ul > li h3')
         .should.deep.equal(['managers'])
-      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-group span')
+      textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-items span')
         .should.deep.equal(['tom', 'tori'])
     })
   })

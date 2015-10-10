@@ -42,7 +42,7 @@
 
           var outerLi = document.createElement('li'),
               groupUl = document.createElement('ul')
-          groupUl.className = 'choose-group'
+          groupUl.className = 'choose-items'
           groupUl.setAttribute('data-bind', 'foreach: $data.items()')
           groupUl.appendChild(itemLi)
 
@@ -124,6 +124,7 @@
         return {
           searchTerm: searchTerm,
           selected: selected,
+          outerUlClass: outerLi ? 'choose-group' : 'choose-items',
           itemTemplate: [outerLi || itemLi],
           matchTemplate: matchTemplate,
           dropdownVisible: dropdownVisible,
@@ -146,7 +147,14 @@
               var show = ko.unwrap(params.showSearch)
               return typeof show === 'function' ? show() : !!show
             } else {
-              return options().length > 10
+              if (outerLi) {
+                var opts = options()
+                return Object.keys(opts).reduce(function(total, key) {
+                  return total + opts[key].items().length
+                }, 0) > 10
+              } else {
+                return options().length > 10
+              }
             }
           },
 
@@ -210,7 +218,7 @@
     template: '<div class="choose-match" data-bind="template: { nodes: matchTemplate, data: selected }, click: toggleDropdown, css: { \'choose-no-selection\': !hasSelection() }"></div>\
 <div class="choose-dropdown">\
   <div class="choose-search-wrapper" data-bind="visible: showSearch()"><input type="text" name="choose-search" data-bind="value: searchTerm, valueUpdate: \'afterkeydown\', attr: { placeholder: searchPlaceholder }, event: { blur: closeOnBlur }"></div>\
-  <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }"></ul>\
+  <ul data-bind="template: { nodes: itemTemplate, foreach: filteredItems() }, css: outerUlClass"></ul>\
 </div>',
     synchronous: true
   })
