@@ -82,10 +82,33 @@
 
         var
           searchTerm = params.searchTerm || ko.observable(),
-          selected = params.selectProperty ? ko[params.multiple ? 'observableArray' : 'observable']() : params.selected,
           dropdownVisible = params.dropdownVisible || ko.observable(false),
           disposables = [],
-          lastFocusedAt = new Date(1, 1, 1980)
+          lastFocusedAt = new Date(1, 1, 1980),
+          selected = params.selected
+
+        if (params.selectProperty) {
+          var initialSelected, initalSelectValue = ko.unwrap(params.selected)
+          if (params.multiple) {
+            if (Array.isArray(initalSelectValue) && initalSelectValue.length) {
+              var opts = options(), initialSelected = []
+              initalSelectValue.forEach(function(v) {
+                var match = opts.filter(function(o) {
+                  return o[params.selectProperty] === v
+                })[0]
+                match && initialSelected.push(match)
+              })
+            }
+            selected = ko.observableArray(initialSelected)
+          } else {
+            if (initalSelectValue) {
+              initialSelected = options().filter(function(o) {
+                return o[params.selectProperty] === initalSelectValue
+              })[0]
+            }
+            selected = ko.observable(initialSelected)
+          }
+        }
 
         if (!ko.isWritableObservable(params.selected)) {
           throw new Error('You must provide a `selected` (value) option as a writable observable')
@@ -133,7 +156,7 @@
           closeOnBlur: closeOnBlur,
 
           toggleDropdown: function() {
-            if (new Date() - lastFocusedAt > 120) {
+            if (new Date() - lastFocusedAt > (params.focusDebounce || 200)) {
               dropdownVisible(!dropdownVisible())
             }
           },

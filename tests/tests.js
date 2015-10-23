@@ -186,6 +186,14 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('Bob - 31')
     })
 
+    !m && it('should initialize the selection to the first choice matching the selectProperty', function() {
+      selected('Jane')
+      testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
+        '<choose-match><span data-bind="text: $data ? $data.name + \' - \' + $data.age : \'nobody\'"></span></choose-match>\
+        <choose-item><span data-bind="text: name + \' - \' + age"></span></choose-item>')
+      matchEl.textContent.should.equal('Jane - 25')
+    })
+
     m && it('should update the value to an array of properties of selectProperty if specified', function() {
       testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
         '<choose-match><span data-bind="text: $root.namesAndAges($component.selected)"></span></choose-match>\
@@ -200,6 +208,14 @@ describe('knockout choose', function() {
 
       click('.choose-dropdown li:nth-child(1)')
       selected().should.deep.equal(['Jane', 'Bob'])
+      matchEl.textContent.should.equal('Jane - 25, Bob - 31')
+    })
+
+    m && it('should initialize the selection to the choices contained in the initial selected', function() {
+      selected(['Jane', 'Bob'])
+      testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
+        '<choose-match><span data-bind="text: $root.namesAndAges($component.selected)"></span></choose-match>\
+        <choose-item><span data-bind="text: name + \' - \' + age"></span></choose-item>')
       matchEl.textContent.should.equal('Jane - 25, Bob - 31')
     })
 
