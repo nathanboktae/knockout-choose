@@ -1,17 +1,18 @@
 (function(factory) {
   if (typeof define === 'function' && define.amd) {
-    define(['knockout'], factory)
+    define(['knockout', 'aria-listbox'], factory)
   } else if (typeof exports === 'object' && typeof module === 'object') {
-    module.exports = factory
+    module.exports = factory(require('knockout'), require('aria-listbox'))
   } else {
-    factory(ko)
+    factory(ko, ariaListbox)
   }
-})(function(ko) {
+})(function(ko, ariaListbox) {
 
   return ko.components.register('choose', {
     viewModel: {
       createViewModel: function(params, componentInfo) {
-        var itemTemplate = componentInfo.templateNodes.filter(function(n) {
+        var chooseEl = componentInfo.element,
+        itemTemplate = componentInfo.templateNodes.filter(function(n) {
           return n.tagName === 'CHOOSE-ITEM'
         })[0],
         matchTemplate = componentInfo.templateNodes.filter(function(n) {
@@ -19,7 +20,8 @@
         })[0]
 
         var itemLi = document.createElement('li')
-        itemLi.setAttribute('data-bind', 'click: $component.selectItem, attr: { "aria-selected": ' + (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
+        itemLi.setAttribute('role', 'option')
+        itemLi.setAttribute('data-bind', 'attr: { "aria-selected": ' + (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
         if (!itemTemplate) {
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
@@ -60,7 +62,7 @@
                 items: function() { return ko.unwrap(groupedOptions[groupName]) }
               }
             })
-          }, null, { disposeWhenNodeIsRemoved: componentInfo.element })
+          }, null, { disposeWhenNodeIsRemoved: chooseEl })
         } else {
           options = function() {
             return ko.unwrap(params.$raw.options()) || []
@@ -116,32 +118,87 @@
           throw new Error('You must provide a `selected` (value) option as an observableArray for multiple selection')
         }
 
-        if (!componentInfo.element.attributes.tabindex) {
-          componentInfo.element.setAttribute('tabindex', '0')
+        if (!chooseEl.attributes.tabindex) {
+          chooseEl.setAttribute('tabindex', '0')
         }
-        componentInfo.element.addEventListener('focus', function(e) {
+        chooseEl.addEventListener('focus', function(e) {
           dropdownVisible(true)
           lastFocusedAt = new Date()
         })
 
         var closeOnBlur = function(e) {
-          if (!e.relatedTarget || !componentInfo.element.contains(e.relatedTarget)) {
+          if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
             dropdownVisible(false)
           }
         }
-        componentInfo.element.addEventListener('blur', closeOnBlur)
+        chooseEl.addEventListener('blur', closeOnBlur)
 
         disposables.push(dropdownVisible.subscribe(function(val) {
           if (val) {
-            componentInfo.element.classList.add('choose-dropdown-open')
-            componentInfo.element.classList.remove('choose-dropdown-closing')
+            chooseEl.classList.add('choose-dropdown-open')
+            chooseEl.classList.remove('choose-dropdown-closing')
           } else {
-            componentInfo.element.classList.add('choose-dropdown-closing')
+            chooseEl.classList.add('choose-dropdown-closing')
           }
         }))
-        componentInfo.element.addEventListener('animationend', function() {
-          componentInfo.element.classList.remove('choose-dropdown-closing')
-          componentInfo.element.classList.toggle('choose-dropdown-open', dropdownVisible())
+        chooseEl.addEventListener('animationend', function() {
+          chooseEl.classList.remove('choose-dropdown-closing')
+          chooseEl.classList.toggle('choose-dropdown-open', dropdownVisible())
+        })
+
+        if (params.multiple) {
+          chooseEl.setAttribute('aria-multiselect', 'true')
+        }
+        ariaListbox(chooseEl, params.ariaListbox)
+
+        function select(item) {
+          if (params.multiple) {
+            var idx = selected().indexOf(item)
+            idx === -1 ? selected.push(item) : selected.splice(idx, 1)
+            if (params.selectProperty) {
+              params.selected(selected().map(function(i) { return i[params.selectProperty] }))
+            }
+          } else {
+            selected(item)
+            if (params.selectProperty) {
+              params.selected(item[params.selectProperty])
+            }
+            dropdownVisible(false)
+          }
+        }
+
+        chooseEl.addEventListener('selection-changed', function(e) {
+          select(ko.contextFor(e.added || e.removed || e.selection).$data)
+        })
+
+        chooseEl.addEventListener('keydown', function(e) {
+          var code = e.code || e.keyCode || e.which,
+              isInput = e.target.tagName === 'INPUT',
+              isOption = e.target.getAttribute('role') === 'option'
+          if (code === 38 /*up arrow*/) {
+            if (isInput) {
+              var options = chooseEl.querySelectorAll('[role="option"]')
+              if (options.length) {
+                options[options.length - 1].setAttribute('tabindex', '0')
+                options[options.length - 1].focus()
+              }
+            } else if (isOption && !e.target.previousElementSibling) {
+              chooseEl.querySelector('input').focus()
+            }
+          } else if (code === 40 /* down arrow */) {
+            if (isInput) {
+              var firstOption = chooseEl.querySelector('[role="option"]')
+              if (firstOption) {
+                firstOption.setAttribute('tabindex', '0')
+                firstOption.focus()
+              }
+            } else if (isOption && !e.target.nextElementSibling) {
+              chooseEl.querySelector('input').focus()
+            }
+          } else if (code === 13 && isInput) {
+            var firstOption = chooseEl.querySelector('[role="option"]')
+            select(ko.contextFor(firstOption).$data)
+          }
         })
 
         return {
@@ -211,22 +268,6 @@
               }).filter(function(g) { return !!g })
             } else {
               return items.filter(predicate)
-            }
-          },
-
-          selectItem: function(item) {
-            if (params.multiple) {
-              var idx = selected().indexOf(item)
-              idx === -1 ? selected.push(item) : selected.splice(idx, 1)
-              if (params.selectProperty) {
-                params.selected(selected().map(function(i) { return i[params.selectProperty] }))
-              }
-            } else {
-              selected(item)
-              if (params.selectProperty) {
-                params.selected(item[params.selectProperty])
-              }
-              dropdownVisible(false)
             }
           },
 

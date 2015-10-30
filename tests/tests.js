@@ -50,6 +50,18 @@ describe('knockout choose', function() {
     el.value = chars
     el.dispatchEvent(evt)
   },
+  keydown = function(el, key) {
+    // Trying to "properly" create a KeyboardEvent is a huge bag of hurt
+    var evt = document.createEvent('UIEvent')
+
+    evt.initEvent('keydown', true, true)
+    evt.keyCode = evt.code = typeof key === 'string' ? key.charCodeAt(0) : key
+    if (typeof el === 'string') {
+      el = testEl.querySelector(el)
+    }
+    el.dispatchEvent(evt)
+    return evt
+  },
   textNodesFor = function(selector) {
     return Array.prototype.map.call(testEl.querySelectorAll(selector), function(el) {
       return el.textContent.trim()
@@ -111,6 +123,7 @@ describe('knockout choose', function() {
     after(function() {
       multiple = false
     })
+
     it('should render and update the list of string options given an observableArray', function() {
       testSetup({ options: colors, selected: selected })
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red'])
@@ -132,6 +145,14 @@ describe('knockout choose', function() {
 
       colors.push('pink')
       textNodesFor('.choose-dropdown ul li').should.deep.equal(['blue', 'brown', 'red', 'pink'])
+    })
+
+    it('should use the aria-listbox role', function() {
+      testSetup()
+      testEl.should.have.attribute('role', 'listbox')
+      Array.prototype.forEach.call(testEl.querySelectorAll('li'), function(el) {
+        el.should.have.attr('role', 'option')
+      })
     })
 
     it('should show a placeholder if there is no initial value', function() {
@@ -209,6 +230,28 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(1)')
       selected().should.deep.equal(['Jane', 'Bob'])
       matchEl.textContent.should.equal('Jane - 25, Bob - 31')
+    })
+
+    !m && it('should update selections when choosen via a keyboard', function() {
+      testSetup({ selected: selected, options: colors })
+
+      keydown('.choose-dropdown li:nth-child(2)', 13 /* enter */)
+      selected().should.equal('brown')
+      matchEl.textContent.should.equal('brown')
+    })
+
+    m && it('should update selections when choosen via a keyboard', function() {
+      testSetup({ selected: selected, options: colors })
+
+      keydown('.choose-dropdown li:nth-child(2)', 13 /* enter */)
+      selected().should.deep.equal(['brown'])
+      matchEl.textContent.should.equal('brown')
+
+      keydown('.choose-dropdown li:nth-child(3)', ' ')
+      selected().should.deep.equal(['brown', 'red'])
+
+      keydown('.choose-dropdown li:nth-child(2)', ' ')
+      selected().should.deep.equal(['red'])
     })
 
     m && it('should initialize the selection to the choices contained in the initial selected', function() {
@@ -531,6 +574,54 @@ describe('knockout choose', function() {
         .should.deep.equal(['managers'])
       textNodesFor('.choose-dropdown > ul > li:first-child ul.choose-items span')
         .should.deep.equal(['tom', 'tori'])
+    })
+
+    it('should focus the first item in the list when arrow down is pressed', function() {
+      searchTestSetup('options: options, selected: selected, showSearch: true', {
+        options: colors,
+        selected: selected
+      })
+
+      searchbox.focus()
+      keydown(searchbox, 38)
+
+      document.activeElement.should.have.text('red')
+    })
+
+    it('should focus the last item in the list when arrow up is pressed', function() {
+      searchTestSetup('options: options, selected: selected, showSearch: true', {
+        options: colors,
+        selected: selected
+      })
+
+      searchbox.focus()
+      keydown(searchbox, 40)
+
+      document.activeElement.should.have.text('blue')
+    })
+
+    it('should focus the searchbox when arrow up is pressed on the top item', function() {
+      searchTestSetup('options: options, selected: selected, showSearch: true', {
+        options: colors,
+        selected: selected
+      })
+
+      var firstItem = testEl.querySelector('li:first-child')
+      firstItem.focus()
+      keydown(firstItem, 38)
+      document.activeElement.should.equal(searchbox)
+    })
+
+    it('should focus the searchbox when arrow down is pressed on the last item', function() {
+      searchTestSetup('options: options, selected: selected, showSearch: true', {
+        options: colors,
+        selected: selected
+      })
+
+      var lastItem = testEl.querySelector('li:last-child')
+      lastItem.focus()
+      keydown(lastItem, 40)
+      document.activeElement.should.equal(searchbox)
     })
   })
 })

@@ -25,6 +25,7 @@ module.exports = function(grunt) {
             version: "8.2"
           }, {
             browserName:"safari",
+            platform: "OS X 10.11",
             version: "9"
           }, {
             browserName:"safari",
