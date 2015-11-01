@@ -176,12 +176,12 @@ describe('knockout choose', function() {
       testEl.should.not.have.class('choose-dropdown-open')
 
       click(matchEl)
-      testEl.should.have.class('choose-dropdown-open')
+      testEl.should.have.class('choose-dropdown-open').and.have.class('choose-dropdown-opening')
 
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal('brown')
       matchEl.textContent.should.equal('brown')
-      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
+      testEl.should.have.class('choose-dropdown-closing').and.not.class('choose-dropdown-open')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(1)')
@@ -262,35 +262,18 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('Jane - 25, Bob - 31')
     })
 
-    window.requestAnimationFrame && it('should remove dropdown open and closing classes after an animation ends', function(done) {
-      try {
-        document.styleSheets[0].insertRule(
-        '@keyframes fade {\
-          0% { opacity: 1; }\
-          100% { opacity: 0; }\
-        }', 1);
-      } catch(e) {
-        done() // some browser that doesn't support keyframes
-        return
-      }
+    it('should use the visible binding if knockout-css3-animation is not available', function() {
+      var animationBinding = ko.bindingHandlers.animation
+      delete ko.bindingHandlers.animation
 
-      document.styleSheets[0].insertRule('.choose-dropdown-closing { color: blue; animation: fade 20ms linear; }', 1);
-      testSetup({ selected: selected, options: colors })
-      testEl.should.not.have.class('choose-dropdown-open')
-      testEl.should.not.have.class('choose-dropdown-closing')
+      testSetup()
+      testEl.style.display.should.equal('')
+      dropdown.style.display.should.equal('none')
 
       click(matchEl)
-      testEl.should.have.class('choose-dropdown-open')
-      testEl.should.not.have.class('choose-dropdown-closing')
+      dropdown.style.display.should.equal('')
 
-      click(matchEl)
-      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
-      setTimeout(function() {
-        document.styleSheets[0].deleteRule(1)
-        testEl.should.not.have.class('choose-dropdown-open')
-        testEl.should.not.have.class('choose-dropdown-closing')
-        done()
-      }, 200)
+      ko.bindingHandlers.animation = animationBinding
     })
 
     it('should provide some default templates if none are specified', function() {
@@ -333,12 +316,12 @@ describe('knockout choose', function() {
       testEl.should.not.have.class('choose-dropdown-open')
 
       click(matchEl)
-      testEl.should.have.class('choose-dropdown-open')
+      testEl.should.have.class('choose-dropdown-open').and.have.class('choose-dropdown-opening')
 
       click('.choose-dropdown li:nth-child(2)')
       selected().should.equal(jane)
       matchEl.textContent.should.equal('Jane')
-      testEl.should.have.class('choose-dropdown-open').and.class('choose-dropdown-closing')
+      testEl.should.have.class('choose-dropdown-closing')
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(4)')

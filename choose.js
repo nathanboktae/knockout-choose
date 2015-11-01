@@ -133,18 +133,20 @@
         }
         chooseEl.addEventListener('blur', closeOnBlur)
 
-        disposables.push(dropdownVisible.subscribe(function(val) {
-          if (val) {
-            chooseEl.classList.add('choose-dropdown-open')
-            chooseEl.classList.remove('choose-dropdown-closing')
-          } else {
-            chooseEl.classList.add('choose-dropdown-closing')
-          }
-        }))
-        chooseEl.addEventListener('animationend', function() {
-          chooseEl.classList.remove('choose-dropdown-closing')
-          chooseEl.classList.toggle('choose-dropdown-open', dropdownVisible())
-        })
+        if (ko.bindingHandlers.animation) {
+          ko.bindingHandlers.animation.init(chooseEl, function() {
+            return {
+              when: dropdownVisible,
+              class: 'choose-dropdown-open',
+              enter: 'choose-dropdown-opening',
+              exit: 'choose-dropdown-closing'
+            }
+          })
+        } else {
+          disposables.push(ko.computed(function() {
+            ko.bindingHandlers.visible.update(chooseEl.querySelector('.choose-dropdown'), dropdownVisible)
+          }))
+        }
 
         if (params.multiple) {
           chooseEl.setAttribute('aria-multiselect', 'true')
