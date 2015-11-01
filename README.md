@@ -17,7 +17,7 @@
     fruits: ['banana', 'apple', 'strawberry', 'pineapple'],
     selected: ko.observable()
   })
-</script>  
+</script>
 ```
 
 #### Single select of objects
@@ -42,7 +42,7 @@
     }],
     selected: ko.observable()
   })
-</script>  
+</script>
 ```
 
 #### Multiple select of objects
@@ -55,7 +55,7 @@
 
 <script>
   ko.applyBindings({
-    fruits: [{
+    people: [{
       name: 'Bob',
       age: 31
     }, {
@@ -73,11 +73,15 @@
         'Nobody selected'
     }
   })
-</script>  
+</script>
 ```
 
 
 ### API
+
+- `options`: If an array or observable array (of any object), they are the items the user chooses from. If an object, grouping is enabled, by properties of the object that have array/observableArray values as options.
+- `selected`: A writable observable for the selected item, or `observableArray` for multiselect mode.
+- `selectProp`: The property of the selected object to bind to the `selected` observable. For example, in the above example with people object as choices, if `selectedProp` was `name`, the `selected` observable would be the string matching the `name` property of the object that was selected.
 
 Documentation to come, for now see [the tests](https://github.com/nathanboktae/knockout-choose/blob/master/tests/tests.js)
 
@@ -94,3 +98,5 @@ or via npm
 ```
 npm install knockout-choose
 ```
+
+An optional and highly recommended dependency is [`knockout-css3-animation`](https://github.com/nathanboktae/knockout-css3-animation/) for animating the dropdown.
