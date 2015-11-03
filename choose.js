@@ -228,7 +228,6 @@
 
           toggleDropdown: function() {
             if (new Date() - lastFocusedAt > (params.focusDebounce || 200)) {
-              console.log('toggle')
               dropdownVisible(!dropdownVisible())
             }
           },
