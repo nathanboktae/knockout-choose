@@ -21,7 +21,8 @@
 
         var itemLi = document.createElement('li')
         itemLi.setAttribute('role', 'option')
-        itemLi.setAttribute('data-bind', 'attr: { "aria-selected": ' + (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
+        itemLi.setAttribute('data-bind', 'event: { blur: $component.closeOnBlur }, attr: { "aria-selected": ' +
+          (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
         if (!itemTemplate) {
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
@@ -124,14 +125,17 @@
         chooseEl.addEventListener('focus', function(e) {
           dropdownVisible(true)
           lastFocusedAt = new Date()
+          setTimeout(function() {
+            chooseEl.querySelector('[name="choose-search"]').focus()
+          }, 20)
         })
 
-        var closeOnBlur = function(e) {
+        var closeOnBlur = function(_, e) {
           if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
             dropdownVisible(false)
           }
         }
-        chooseEl.addEventListener('blur', closeOnBlur)
+        chooseEl.addEventListener('blur', closeOnBlur.bind(null, null))
 
         if (ko.bindingHandlers.animation) {
           ko.bindingHandlers.animation.init(chooseEl, function() {
@@ -178,6 +182,8 @@
               isInput = e.target.tagName === 'INPUT',
               isOption = e.target.getAttribute('role') === 'option'
           if (code === 38 /*up arrow*/) {
+            e.preventDefault()
+            e.stopPropagation()
             if (isInput) {
               var options = chooseEl.querySelectorAll('[role="option"]')
               if (options.length) {
@@ -188,6 +194,8 @@
               chooseEl.querySelector('input').focus()
             }
           } else if (code === 40 /* down arrow */) {
+            e.preventDefault()
+            e.stopPropagation()
             if (isInput) {
               var firstOption = chooseEl.querySelector('[role="option"]')
               if (firstOption) {

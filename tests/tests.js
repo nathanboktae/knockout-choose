@@ -33,34 +33,30 @@ describe('knockout choose', function() {
     matchEl = testEl.querySelector('.choose-match')
     dropdown = testEl.querySelector('.choose-dropdown')
   },
-  click = function(el) {
-    var evt = document.createEvent('MouseEvents')
-    evt.initEvent('click', true, true)
+  dispatchEvent = function(cls, type, moreInit, el) {
+    var evt = document.createEvent(cls)
+    evt.initEvent(type, true, true)
     if (typeof el === 'string') {
       el = document.querySelector(el)
     }
-    el.dispatchEvent(evt)
-  },
-  type = function(el, chars) {
-    var evt = document.createEvent('KeyboardEvent')
-    evt.initEvent('keydown', true, true)
-    if (typeof el === 'string') {
-      el = document.querySelector(el)
-    }
-    el.value = chars
-    el.dispatchEvent(evt)
-  },
-  keydown = function(el, key) {
-    // Trying to "properly" create a KeyboardEvent is a huge bag of hurt
-    var evt = document.createEvent('UIEvent')
-
-    evt.initEvent('keydown', true, true)
-    evt.keyCode = evt.code = typeof key === 'string' ? key.charCodeAt(0) : key
-    if (typeof el === 'string') {
-      el = testEl.querySelector(el)
+    if (typeof moreInit === 'function') {
+      moreInit(el, evt)
     }
     el.dispatchEvent(evt)
     return evt
+  },
+  click = dispatchEvent.bind(null, 'MouseEvents', 'click', null),
+  blur = dispatchEvent.bind(null, 'FocusEvent', 'blur', null),
+  type = function(el, chars) {
+    return dispatchEvent('KeyboardEvent', 'keydown', function(el) {
+      el.value = chars
+    }, el)
+  },
+  keydown = function(el, key) {
+    // Trying to "properly" create a KeyboardEvent is a huge bag of hurt
+    return dispatchEvent('UIEvent', 'keydown', function(el, evt) {
+      evt.keyCode = evt.code = typeof key === 'string' ? key.charCodeAt(0) : key
+    }, el)
   },
   textNodesFor = function(selector) {
     return Array.prototype.map.call(testEl.querySelectorAll(selector), function(el) {
@@ -328,6 +324,27 @@ describe('knockout choose', function() {
       selected().should.equal(dwane)
       matchEl.textContent.should.equal('Dwane')
     })
+
+    it('should close the dropdown when focus is lost on the choose element', function() {
+      testSetup()
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+      blur(testEl)
+      testEl.should.not.have.class('choose-dropdown-open')
+    })
+
+    it('should close the dropdown when focus is lost on a list item', function() {
+      testSetup()
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+
+      var firstItem = testEl.querySelector('ul.choose-items li')
+      firstItem.focus()
+      testEl.should.have.class('choose-dropdown-open')
+
+      blur(firstItem)
+      testEl.should.not.have.class('choose-dropdown-open')
+    })
   })
   })
 
@@ -566,9 +583,34 @@ describe('knockout choose', function() {
       })
 
       searchbox.focus()
-      keydown(searchbox, 38)
+      keydown(searchbox, 38).defaultPrevented.should.be.true
 
       document.activeElement.should.have.text('red')
+    })
+
+    it('should focus the searchbox when the choose element is focused', function(done) {
+      searchTestSetup('options: options, selected: selected, showSearch: true', {
+        options: colors,
+        selected: selected
+      })
+
+      click(matchEl)
+      testEl.focus()
+      setTimeout(function() {
+        document.activeElement.should.equal(searchbox)
+        done()
+      }, 100)
+    })
+
+    it('should close the dropdown when focus is lost from the searchbox', function() {
+      searchTestSetup('options: options, selected: selected, showSearch: true')
+
+      click(matchEl)
+      searchbox.focus()
+      testEl.should.have.class('choose-dropdown-open')
+
+      blur(searchbox)
+      testEl.should.not.have.class('choose-dropdown-open')
     })
 
     it('should focus the last item in the list when arrow up is pressed', function() {
@@ -578,7 +620,7 @@ describe('knockout choose', function() {
       })
 
       searchbox.focus()
-      keydown(searchbox, 40)
+      keydown(searchbox, 40).defaultPrevented.should.be.true
 
       document.activeElement.should.have.text('blue')
     })
@@ -591,7 +633,7 @@ describe('knockout choose', function() {
 
       var firstItem = testEl.querySelector('li:first-child')
       firstItem.focus()
-      keydown(firstItem, 38)
+      keydown(firstItem, 38).defaultPrevented.should.be.true
       document.activeElement.should.equal(searchbox)
     })
 
@@ -603,7 +645,7 @@ describe('knockout choose', function() {
 
       var lastItem = testEl.querySelector('li:last-child')
       lastItem.focus()
-      keydown(lastItem, 40)
+      keydown(lastItem, 40).defaultPrevented.should.be.true
       document.activeElement.should.equal(searchbox)
     })
   })
