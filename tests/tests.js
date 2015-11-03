@@ -37,7 +37,7 @@ describe('knockout choose', function() {
     var evt = document.createEvent(cls)
     evt.initEvent(type, true, true)
     if (typeof el === 'string') {
-      el = document.querySelector(el)
+      el = testEl.querySelector(el)
     }
     if (typeof moreInit === 'function') {
       moreInit(el, evt)
@@ -231,6 +231,7 @@ describe('knockout choose', function() {
     !m && it('should update selections when choosen via a keyboard', function() {
       testSetup({ selected: selected, options: colors })
 
+      click(matchEl)
       keydown('.choose-dropdown li:nth-child(2)', 13 /* enter */)
       selected().should.equal('brown')
       matchEl.textContent.should.equal('brown')
@@ -407,14 +408,20 @@ describe('knockout choose', function() {
     })
 
     it('should do nothing when clicking a group header', function() {
+      clock = sinon.useFakeTimers()
       groupedColorsTest()
 
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
       should.not.exist(selected())
 
       click('.choose-dropdown li:first-child ul.choose-items li:nth-child(2)')
+      clock.tick(100)
       click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+      clock.tick(100)
+      testEl.should.have.class('choose-dropdown-open')
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
+      clock.tick(100)
       testEl.should.have.class('choose-dropdown-open')
     })
 
@@ -625,7 +632,7 @@ describe('knockout choose', function() {
       document.activeElement.should.have.text('blue')
     })
 
-    it('should focus the searchbox when arrow up is pressed on the top item', function() {
+    it('should focus the searchbox when arrow up is pressed on the top item', function(done) {
       searchTestSetup('options: options, selected: selected, showSearch: true', {
         options: colors,
         selected: selected
@@ -634,10 +641,13 @@ describe('knockout choose', function() {
       var firstItem = testEl.querySelector('li:first-child')
       firstItem.focus()
       keydown(firstItem, 38).defaultPrevented.should.be.true
-      document.activeElement.should.equal(searchbox)
+      setTimeout(function() {
+        document.activeElement.should.equal(searchbox)
+        done()
+      }, 150)
     })
 
-    it('should focus the searchbox when arrow down is pressed on the last item', function() {
+    it('should focus the searchbox when arrow down is pressed on the last item', function(done) {
       searchTestSetup('options: options, selected: selected, showSearch: true', {
         options: colors,
         selected: selected
@@ -646,7 +656,10 @@ describe('knockout choose', function() {
       var lastItem = testEl.querySelector('li:last-child')
       lastItem.focus()
       keydown(lastItem, 40).defaultPrevented.should.be.true
-      document.activeElement.should.equal(searchbox)
+      setTimeout(function() {
+        document.activeElement.should.equal(searchbox)
+        done()
+      }, 150)
     })
   })
 })

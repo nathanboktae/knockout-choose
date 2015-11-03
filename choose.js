@@ -123,8 +123,10 @@
           chooseEl.setAttribute('tabindex', '0')
         }
         chooseEl.addEventListener('focus', function(e) {
+          if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
+            lastFocusedAt = new Date()
+          }
           dropdownVisible(true)
-          lastFocusedAt = new Date()
           setTimeout(function() {
             chooseEl.querySelector('[name="choose-search"]').focus()
           }, 20)
@@ -169,6 +171,7 @@
             if (params.selectProperty) {
               params.selected(item[params.selectProperty])
             }
+            chooseEl.focus()
             dropdownVisible(false)
           }
         }
@@ -179,8 +182,9 @@
 
         chooseEl.addEventListener('keydown', function(e) {
           var code = e.code || e.keyCode || e.which,
-              isInput = e.target.tagName === 'INPUT',
-              isOption = e.target.getAttribute('role') === 'option'
+              isInput = e.target.tagName === 'INPUT' || e.target === chooseEl,
+              isOption = e.target.getAttribute('role') === 'option',
+              firstOption
           if (code === 38 /*up arrow*/) {
             e.preventDefault()
             e.stopPropagation()
@@ -191,22 +195,22 @@
                 options[options.length - 1].focus()
               }
             } else if (isOption && !e.target.previousElementSibling) {
-              chooseEl.querySelector('input').focus()
+              chooseEl.focus()
             }
           } else if (code === 40 /* down arrow */) {
             e.preventDefault()
             e.stopPropagation()
             if (isInput) {
-              var firstOption = chooseEl.querySelector('[role="option"]')
+              firstOption = chooseEl.querySelector('[role="option"]')
               if (firstOption) {
                 firstOption.setAttribute('tabindex', '0')
                 firstOption.focus()
               }
             } else if (isOption && !e.target.nextElementSibling) {
-              chooseEl.querySelector('input').focus()
+              chooseEl.focus()
             }
           } else if (code === 13 && isInput) {
-            var firstOption = chooseEl.querySelector('[role="option"]')
+            firstOption = chooseEl.querySelector('[role="option"]')
             select(ko.contextFor(firstOption).$data)
           }
         })
@@ -224,6 +228,7 @@
 
           toggleDropdown: function() {
             if (new Date() - lastFocusedAt > (params.focusDebounce || 200)) {
+              console.log('toggle')
               dropdownVisible(!dropdownVisible())
             }
           },
