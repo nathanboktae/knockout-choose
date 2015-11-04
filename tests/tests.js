@@ -346,6 +346,42 @@ describe('knockout choose', function() {
       blur(firstItem)
       testEl.should.not.have.class('choose-dropdown-open')
     })
+
+    it('should not open the dropdown on focus or click when disabled', function() {
+      var disabled = ko.observable(true)
+      testSetup('options: options, selected: selected, disabled: disabled', {
+        options: colors,
+        selected: selected,
+        disabled: disabled
+      })
+
+      testEl.should.have.attribute('aria-disabled', 'true')
+
+      testEl.focus()
+      testEl.should.not.have.class('choose-dropdown-open')
+
+      click(matchEl)
+      testEl.should.not.have.class('choose-dropdown-open')
+
+      disabled(false)
+      testEl.should.not.have.attribute('aria-disabled')
+
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+    })
+
+    !m && it('should not allow the selection to change when it is disabled', function() {
+      var disabled = ko.observable(true)
+      selected('blue')
+      testSetup('options: options, selected: selected, disabled: disabled', {
+        options: colors,
+        selected: selected,
+        disabled: disabled
+      })
+
+      click('li:nth-child(3)')
+      selected().should.equal('blue')
+    })
   })
   })
 

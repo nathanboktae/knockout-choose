@@ -12,14 +12,15 @@
     viewModel: {
       createViewModel: function(params, componentInfo) {
         var chooseEl = componentInfo.element,
+        disposables = [],
         itemTemplate = componentInfo.templateNodes.filter(function(n) {
           return n.tagName === 'CHOOSE-ITEM'
         })[0],
         matchTemplate = componentInfo.templateNodes.filter(function(n) {
           return n.tagName === 'CHOOSE-MATCH'
-        })[0]
+        })[0],
+        itemLi = document.createElement('li')
 
-        var itemLi = document.createElement('li')
         itemLi.setAttribute('role', 'option')
         itemLi.setAttribute('data-bind', 'event: { blur: $component.closeOnBlur }, attr: { "aria-selected": ' +
           (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
@@ -86,7 +87,6 @@
         var
           searchTerm = params.searchTerm || ko.observable(),
           dropdownVisible = params.dropdownVisible || ko.observable(false),
-          disposables = [],
           lastFocusedAt = new Date(1, 1, 1980),
           selected = params.selected
 
@@ -123,6 +123,7 @@
           chooseEl.setAttribute('tabindex', '0')
         }
         chooseEl.addEventListener('focus', function(e) {
+          if (ko.unwrap(params.disabled)) return
           if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
             lastFocusedAt = new Date()
           }
@@ -159,7 +160,16 @@
         }
         ariaListbox(chooseEl, params.ariaListbox)
 
+        disposables.push(ko.computed(function() {
+          if (ko.unwrap(params.disabled)) {
+            chooseEl.setAttribute('aria-disabled', 'true')
+          } else {
+            chooseEl.removeAttribute('aria-disabled')
+          }
+        }))
+
         function select(item) {
+          if (ko.unwrap(params.disabled)) return
           if (params.multiple) {
             var idx = selected().indexOf(item)
             idx === -1 ? selected.push(item) : selected.splice(idx, 1)
@@ -227,6 +237,7 @@
           closeOnBlur: closeOnBlur,
 
           toggleDropdown: function() {
+            if (ko.unwrap(params.disabled)) return
             if (new Date() - lastFocusedAt > (params.focusDebounce || 200)) {
               dropdownVisible(!dropdownVisible())
             }
