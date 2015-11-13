@@ -46,6 +46,120 @@
         }, document.body.querySelector('choose.single-strings'))
       </script>
 
+      <h3>Single select of objects</h3>
+
+      <p>(try tabbing and using the keyboard too! thanks to <a href="https://github.com/nathanboktae/aria-listbox">aria-listbox</a>)</p>
+
+      <pre><code class="html">&lt;choose params=&quot;options: people, selected: selected&quot;&gt;
+  &lt;choose-match&gt;&lt;span data-bind=&quot;text: $data ? name + &#39; is &#39; + age : &#39;Select a person&#39;&quot;&gt;&lt;/span&gt;&lt;/choose-match&gt;
+  &lt;choose-item&gt;&lt;!-- ko text: name --&gt;&lt;!-- /ko --&gt;&lt;/choose-item&gt;
+&lt;/choose&gt;
+
+&lt;script&gt;
+  ko.applyBindings({
+    people: [{
+      name: &#39;Bob&#39;,
+      age: 31
+    }, {
+      name: &#39;Jane&#39;,
+      age: 25
+    }, {
+      name: &#39;Anne&#39;,
+      age: 42
+    }],
+    selected: ko.observable()
+  })
+&lt;/script&gt;</code></pre>
+
+      <choose class="single-objects" params="options: people, selected: selected">
+        <choose-match><span data-bind="text: $data ? name + ' is ' + age : 'Select a person'"></span></choose-match>
+        <choose-item><!-- ko text: name --><!-- /ko --></choose-item>
+      </choose>
+
+      <script>
+        ko.applyBindings({
+          people: [{
+            name: 'Bob',
+            age: 31
+          }, {
+            name: 'Jane',
+            age: 25
+          }, {
+            name: 'Anne',
+            age: 42
+          }],
+          selected: ko.observable()
+        }, document.body.querySelector('choose.single-objects'))
+      </script>
+
+      <h3>Multiple select of objects</h3>
+
+      <pre><code class="html">&lt;choose params=&quot;options: people, selected: selected, multiple: true&quot;&gt;
+  &lt;choose-match&gt;&lt;span data-bind=&quot;text: $root.selectionText($data)&quot;&gt;&lt;/span&gt;&lt;/choose-match&gt;
+  &lt;choose-item&gt;&lt;span data-bind=&quot;text: $data.name&quot;&gt;&lt;/span&gt; is &lt;span data-bind=&quot;text: $data.age&quot;&gt;&lt;/span&gt;&lt;/choose-item&gt;
+&lt;/choose&gt;
+
+&lt;script&gt;
+  ko.applyBindings({
+    people: [{
+      name: &#39;Bob&#39;,
+      age: 31
+    }, {
+      name: &#39;Jane&#39;,
+      age: 25
+    }, {
+      name: &#39;Anne&#39;,
+      age: 42
+    }],
+    selected: ko.observableArray(),
+
+    selectionText: function(data) {
+      return data.length ?
+        data.length + &#39; people selected: &#39; + data.map(p =&gt; p.name).join(&#39;, &#39;) :
+        &#39;Nobody selected&#39;
+    }
+  })
+&lt;/script&gt;</code>
+      </pre>
+
+      <choose class="multiple" params="options: people, selected: selected, multiple: true">
+        <choose-match><span data-bind="text: $root.selectionText($data)"></span></choose-match>
+        <choose-item><span data-bind="text: $data.name"></span> is <span data-bind="text: $data.age"></span></choose-item>
+      </choose>
+
+      <script>
+        ko.applyBindings({
+          people: [{
+            name: 'Bob',
+            age: 31
+          }, {
+            name: 'Jane',
+            age: 25
+          }, {
+            name: 'Anne',
+            age: 42
+          }],
+          selected: ko.observableArray(),
+
+          selectionText: function(data) {
+            if (data.length === 0) return 'No one is selected'
+            return data.length === 1 ?
+              data[0].name + ' is ' + data[0].age :
+              data.length + ' people selected: ' + data.map(p => p.name).join(', ')
+          }
+        }, document.body.querySelector('choose.multiple'))
+      </script>
+
+      <h3>Installation</h3>
+
+      <h4><a href="https://www.npmjs.com/package/knockout-choose">npm</a><h4>
+      <pre><code>npm install --save knockout-choose</code></pre>
+
+      <h4><a href="http://bower.io/search/?q=knockout-choose">bower</a><h4>
+      <pre><code>bower install --save knockout-choose</code></pre>
+
+      <p>Source on <a href="https://github.com/nathanboktae/knockout-choose">GitHub</a></p>
+
     </article>
   </main>
 </body>
