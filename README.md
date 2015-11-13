@@ -8,6 +8,8 @@
 
 ### Examples
 
+See all of these [examples live!](http://nathanboktae.github.io/knockout-choose/)
+
 #### Single select of strings
 
 ```html
@@ -30,7 +32,7 @@
 
 <script>
   ko.applyBindings({
-    fruits: [{
+    people: [{
       name: 'Bob',
       age: 31
     }, {
@@ -50,7 +52,7 @@
 ```html
 <choose params="options: people, selected: selected, multiple: true">
   <choose-match><span data-bind="text: $root.selectionText($data)"></span></choose-match>
-  <choose-item><p data-bind="text: $data.name"></p> is <span data-bind="text: $data.age"></span></choose-item>
+  <choose-item><span data-bind="text: $data.name"></span> is <span data-bind="text: $data.age"></span></choose-item>
 </choose>
 
 <script>
@@ -65,11 +67,11 @@
       name: 'Anne',
       age: 42
     }],
-    selected: ko.observable(),
+    selected: ko.observableArray(),
 
     selectionText: function(data) {
       return data.length ?
-        data.length + ' people selected: ' + data.join(', ') :
+        data.length + ' people selected: ' + data.map(p => p.name).join(', ') :
         'Nobody selected'
     }
   })
