@@ -31,6 +31,21 @@
     selected: ko.observable()
   })
 &lt;/script&gt;</code></pre>
+
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-debug.js"></script>
+      <script src="aria-listbox-0.1.3.js"></script>
+      <script src="knockout-css3-animation-0.1.1.js"></script>
+      <script src="choose-0.4.4.js"></script>
+
+      <choose class="single-strings" params="options: fruits, selected: selected"></choose>
+      <script>
+        ko.applyBindings({
+          fruits: ['banana', 'apple', 'strawberry', 'pineapple'],
+          selected: ko.observable()
+        }, document.body.querySelector('choose.single-strings'))
+      </script>
+
     </article>
   </main>
 </body>

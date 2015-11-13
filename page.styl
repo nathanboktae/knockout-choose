@@ -10,12 +10,13 @@ text-color = #2f496e
 header-color = #2988bc
 accent-color = #ed8c72
 
+open-animation-duration = 250ms
+
 // Subdued and Professional
 // backg-color = hsla(204.9, 71.4%, 96.9%, 1.0)
 // text-color = #2a3132
 // header-color = #763626
 // accent-color = #336b87
-
 
 
 body
@@ -30,7 +31,106 @@ article
 
 h1, h2
   font-family 'Julius Sans One'
+  text-transform lowercase
   color header-color
 
 p, h3, h4
   font-weight 300
+
+@keyframes slidedownin
+  0%
+    transform translateY(-100%)
+  100%
+    transform translateY(0)
+
+@keyframes slideupout
+  0%
+    transform translateY(0)
+  100%
+    transform translateY(-100%)
+
+choose
+  position relative
+  display inline-block
+  box-sizing border-box
+  .choose-match
+    padding 8px
+    cursor pointer
+  .choose-dropdown
+    position absolute
+    top 100%
+    left 0
+    min-width 100%
+    z-index 10
+    margin-top -1px
+    display none
+    overflow hidden
+  &:focus
+    outline 0
+
+  *
+    box-sizing border-box
+
+  ul
+    list-style none
+    margin 0
+    padding 0
+    min-width 100%
+    li
+      display block
+      margin 0
+      padding 0.4em 1em
+      span
+        line-height 1.4em
+
+    > ul
+      max-height 340px
+      overflow-y auto
+      background choose-color-dropdown
+      min-width 100px
+
+  &.choose-dropdown-open, &.choose-dropdown-closing
+    .choose-dropdown
+      display block
+  &.choose-dropdown-opening .choose-dropdown > ul
+    animation slidedownin open-animation-duration ease-in-out
+  &.choose-dropdown-closing .choose-dropdown > ul
+    animation slideupout open-animation-duration ease-in-out
+
+
+choose.single-strings
+  box-shadow inset 0 0 0 1px alpha(text-color, 0.5)
+  transition box-shadow 150ms linear
+  transition background-color open-animation-duration linear
+  .choose-match::after
+    content ' '
+    display inline-block
+    border 6px solid transparent
+    border-top-color text-color
+    vertical-align middle
+    margin-left 1em
+    transition background-color open-animation-duration linear
+    transition border-color 150ms linear
+    span
+      transition color open-animation-duration linear
+  &:not(.choose-dropdown-open):hover, &:not(.choose-dropdown-open):focus
+    box-shadow inset 0 0 0 1px alpha(header-color, 0.5)
+    .choose-match::after
+      border-top-color header-color
+  &.choose-dropdown-open
+    border-bottom-color transparent
+    background-color text-color
+    .choose-dropdown
+      display block
+    .choose-match
+      &::after
+        border-top-color backg-color
+      span
+        color backg-color
+  .choose-dropdown > ul
+    color backg-color
+    background-color text-color
+    li
+      &:hover, &:focus
+        background-color accent-color
+        text-color text-color
