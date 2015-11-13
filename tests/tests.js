@@ -299,7 +299,16 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal(multiple ? 'Jane, Dwane' : 'Jane')
     })
 
-    !m && it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
+    it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
+      testSetup()
+      matchEl.should.have.class('choose-no-selection')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(2)')
+      matchEl.should.not.have.class('choose-no-selection')
+    })
+
+    !m && it('should properly bind when options are falsy, setting choose-no-selection correctly', function() {
       testSetup({ options: [true, false, 0, null], selected: selected })
       matchEl.should.have.class('choose-no-selection')
 
@@ -315,15 +324,6 @@ describe('knockout choose', function() {
 
       click(matchEl)
       click('.choose-dropdown li:nth-child(4)')
-      matchEl.should.not.have.class('choose-no-selection')
-    })
-
-    it('should properly bind when options are falsy, setting choose-no-selection correctly ', function() {
-      testSetup()
-      matchEl.should.have.class('choose-no-selection')
-
-      click(matchEl)
-      click('.choose-dropdown li:nth-child(2)')
       matchEl.should.not.have.class('choose-no-selection')
     })
 
@@ -462,21 +462,12 @@ describe('knockout choose', function() {
       testEl.querySelector('.choose-match span').textContent.should.equal('citron')
     })
 
-    it('should do nothing when clicking a group header', !window.callPhantom && function() {
-      clock = sinon.useFakeTimers()
+    it('should do nothing when clicking a group header', function() {
       groupedColorsTest()
 
+      click(matchEl)
       click('.choose-dropdown > ul > li:first-child .choose-group-header')
       should.not.exist(selected())
-
-      click('.choose-dropdown li:first-child ul.choose-items li:nth-child(2)')
-      clock.tick(100)
-      click(matchEl)
-      testEl.should.have.class('choose-dropdown-open')
-      clock.tick(100)
-      testEl.should.have.class('choose-dropdown-open')
-      click('.choose-dropdown > ul > li:first-child .choose-group-header')
-      clock.tick(100)
       testEl.should.have.class('choose-dropdown-open')
     })
 
