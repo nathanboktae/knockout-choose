@@ -244,7 +244,7 @@
           },
 
           hasSelection: function() {
-            return params.multiple ? !!selected().length : !!selected()
+            return params.multiple ? !!selected().length : selected() !== undefined
           },
 
           showSearch: function() {

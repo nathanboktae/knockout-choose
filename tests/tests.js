@@ -299,7 +299,26 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal(multiple ? 'Jane, Dwane' : 'Jane')
     })
 
-    it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
+    !m && it('should have a choose-no-selection class on choose-match when there is nothing selected', function() {
+      testSetup({ options: [true, false, 0, null], selected: selected })
+      matchEl.should.have.class('choose-no-selection')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(2)')
+      matchEl.should.not.have.class('choose-no-selection')
+      matchEl.should.have.text('false')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(3)')
+      matchEl.should.not.have.class('choose-no-selection')
+      matchEl.should.have.text('0')
+
+      click(matchEl)
+      click('.choose-dropdown li:nth-child(4)')
+      matchEl.should.not.have.class('choose-no-selection')
+    })
+
+    it('should properly bind when options are falsy, setting choose-no-selection correctly ', function() {
       testSetup()
       matchEl.should.have.class('choose-no-selection')
 
