@@ -346,14 +346,17 @@ describe('knockout choose', function() {
     })
 
     it('should close the dropdown when focus is lost on the choose element', function() {
+      clock = sinon.useFakeTimers()
       testSetup()
       click(matchEl)
       testEl.should.have.class('choose-dropdown-open')
       blur(testEl)
+      clock.tick(30)
       testEl.should.not.have.class('choose-dropdown-open')
     })
 
     it('should close the dropdown when focus is lost on a list item', function() {
+      clock = sinon.useFakeTimers()
       testSetup()
       click(matchEl)
       testEl.should.have.class('choose-dropdown-open')
@@ -363,6 +366,7 @@ describe('knockout choose', function() {
       testEl.should.have.class('choose-dropdown-open')
 
       blur(firstItem)
+      clock.tick(30)
       testEl.should.not.have.class('choose-dropdown-open')
     })
 
@@ -656,6 +660,7 @@ describe('knockout choose', function() {
     })
 
     it('should close the dropdown when focus is lost from the searchbox', function() {
+      clock = sinon.useFakeTimers()
       searchTestSetup('options: options, selected: selected, showSearch: true')
 
       click(matchEl)
@@ -663,6 +668,7 @@ describe('knockout choose', function() {
       testEl.should.have.class('choose-dropdown-open')
 
       blur(searchbox)
+      clock.tick(30)
       testEl.should.not.have.class('choose-dropdown-open')
     })
 

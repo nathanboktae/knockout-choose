@@ -122,20 +122,30 @@
         if (!chooseEl.attributes.tabindex) {
           chooseEl.setAttribute('tabindex', '0')
         }
+        var pendingBlur = false
         chooseEl.addEventListener('focus', function(e) {
           if (ko.unwrap(params.disabled)) return
-          if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
+          if (!dropdownVisible()) {
             lastFocusedAt = new Date()
           }
+          pendingBlur = false
           dropdownVisible(true)
           setTimeout(function() {
             chooseEl.querySelector('[name="choose-search"]').focus()
-          }, 20)
+            pendingBlur = false
+          }, 10)
         })
 
         var closeOnBlur = function(_, e) {
           if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
-            dropdownVisible(false)
+            // unfortunately due to poor browser support of relatedTarget, we need to delay this to see if
+            // the focus really was one of our elements
+            pendingBlur = true
+            setTimeout(function() {
+              if (pendingBlur) {
+                dropdownVisible(false)
+              }
+            }, 20)
           }
         }
         chooseEl.addEventListener('blur', closeOnBlur.bind(null, null))
