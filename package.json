@@ -16,7 +16,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "mocha-phantomjs tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
+    "test": "npm install knockout@3.3.0 && mocha-phantomjs tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
   },
   "keywords": [
     "select",
