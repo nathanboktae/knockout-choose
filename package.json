@@ -1,6 +1,6 @@
 {
   "name": "knockout-chooose",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A lightweight and powerful select alternative to let users choose items from many options",
   "main": "choose.js",
   "devDependencies": {
@@ -30,6 +30,6 @@
   "license": "ISC",
   "dependencies": {
     "knockout": "^3.2.0",
-    "aria-listbox": "^0.1.2"
+    "aria-listbox": "^0.2.0"
   }
 }

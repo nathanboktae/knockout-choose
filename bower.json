@@ -30,6 +30,6 @@
   ],
   "dependencies": {
     "knockout": "^3.2.0",
-    "aria-listbox": "^0.1.2"
+    "aria-listbox": "^0.2.0"
   }
 }
