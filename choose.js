@@ -23,7 +23,9 @@
 
         itemLi.setAttribute('role', 'option')
         itemLi.setAttribute('data-bind', 'event: { blur: $component.closeOnBlur }, attr: { "aria-selected": ' +
-          (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
+          (params.multiple ? '$component.selected().indexOf($data) !== -1' : '$data === $component.selected()') +
+          (params.disabledItems ? ', "aria-disabled": ko.unwrap($component.disabledItems).indexOf($data) !== -1' : '') + ' }')
+
         if (!itemTemplate) {
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
@@ -180,6 +182,8 @@
 
         function select(item) {
           if (ko.unwrap(params.disabled)) return
+          if (params.disabledItems && ko.unwrap(params.disabledItems).indexOf(item) !== -1) return
+
           if (params.multiple) {
             var idx = selected().indexOf(item)
             idx === -1 ? selected.push(item) : selected.splice(idx, 1)
@@ -231,7 +235,9 @@
             }
           } else if (code === 13 && isInput) {
             firstOption = chooseEl.querySelector('[role="option"]')
-            select(ko.contextFor(firstOption).$data)
+            if (firstOption) {
+              select(ko.contextFor(firstOption).$data)
+            }
           }
         })
 
@@ -245,6 +251,7 @@
           placeholder: params.placeholder || 'Choose...',
           searchPlaceholder: params.searchPlaceholder,
           closeOnBlur: closeOnBlur,
+          disabledItems: params.disabledItems,
 
           toggleDropdown: function() {
             if (ko.unwrap(params.disabled)) return

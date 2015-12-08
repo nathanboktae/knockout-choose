@@ -85,6 +85,7 @@ See all of these [examples live!](http://nathanboktae.github.io/knockout-choose/
 - `selected`: A writable observable for the selected item, or `observableArray` for multiselect mode.
 - `selectProp`: The property of the selected object to bind to the `selected` observable. For example, in the above example with people object as choices, if `selectedProp` was `name`, the `selected` observable would be the string matching the `name` property of the object that was selected.
 - `disabled`: An expression, observable, or scalar that if is truthy, disables the dropdown, disallowing selection changes or the dropdown to open.
+- `disabledItems`: An array or observable array of items that are shown (marked with `aria-disabled`) but cannot be selected.
 
 See [the tests](https://github.com/nathanboktae/knockout-choose/blob/master/tests/tests.js) for more specifics.
 

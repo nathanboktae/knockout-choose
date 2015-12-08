@@ -405,6 +405,43 @@ describe('knockout choose', function() {
       click('li:nth-child(3)')
       selected().should.equal('blue')
     })
+
+    it('should mark items from disabledItems as aria-disabled', function() {
+      var disabledItems = ko.observableArray()
+      testSetup('options: options, selected: selected, disabledItems: disabledItems', {
+        options: colors,
+        selected: selected,
+        disabledItems: disabledItems
+      })
+
+      testEl.should.have.not.attribute('aria-disabled', 'true')
+      click(matchEl)
+
+      attributesFor('li', 'aria-disabled').should.deep.equal([null, null, null])
+
+      disabledItems.push('brown')
+      attributesFor('li', 'aria-disabled').should.deep.equal([null, 'true', null])
+    })
+
+    it('should not allow selection of disabled items', function() {
+      var disabledItems = [dwane, people()[0]]
+      testSetup('options: options, selected: selected, disabledItems: disabledItems', {
+        options: people,
+        selected: selected,
+        disabledItems: disabledItems
+      }, nameTemplates)
+
+      attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, null, 'true', null, null])
+
+      click('li:nth-child(4)')
+      chai.expect(selected()).to.deep.equal(multiple ? [] : undefined)
+
+      click('li:nth-child(2)')
+      selected().should.deep.equal(multiple ? [jane] : jane)
+
+      click('li:first-child')
+      selected().should.deep.equal(multiple ? [jane] : jane)
+    })
   })
   })
 

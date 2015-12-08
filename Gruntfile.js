@@ -49,7 +49,7 @@ module.exports = function(grunt) {
             platform: 'WIN8',
             version: '10'
           }],
-          testname: 'frypan-knockout-grid tests',
+          testname: 'knockout-choose tests',
           tags: [process.env.TRAVIS_BRANCH || 'local']
         }
       }
