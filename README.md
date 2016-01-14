@@ -83,7 +83,7 @@ See all of these [examples live!](http://nathanboktae.github.io/knockout-choose/
 
 - `options`: If an array or observable array (of any object), they are the items the user chooses from. If an object, grouping is enabled, by properties of the object that have array/observableArray values as options.
 - `selected`: A writable observable for the selected item, or `observableArray` for multiselect mode.
-- `selectProp`: The property of the selected object to bind to the `selected` observable. For example, in the above example with people object as choices, if `selectedProp` was `name`, the `selected` observable would be the string matching the `name` property of the object that was selected.
+- `selectProperty`: The property of the selected object to bind to the `selected` observable. For example, in the above example with people object as choices, if `selectProperty` was `name`, the `selected` observable would be the string matching the `name` property of the object that was selected.
 - `disabled`: An expression, observable, or scalar that if is truthy, disables the dropdown, disallowing selection changes or the dropdown to open.
 - `disabledItems`: An expression, observable, or scalar of an array of items that are shown (marked with `aria-disabled`) but cannot be selected.
 
