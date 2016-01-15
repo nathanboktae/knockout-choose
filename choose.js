@@ -24,7 +24,7 @@
         itemLi.setAttribute('role', 'option')
         itemLi.setAttribute('data-bind', 'event: { blur: $component.closeOnBlur }, attr: { "aria-selected": ' +
           (params.multiple ? '$component.selected().indexOf($data) !== -1' : '$data === $component.selected()') +
-          (params.disabledItems ? ', "aria-disabled": ko.unwrap($component.disabledItems).indexOf($data) !== -1' : '') + ' }')
+          (params.disabledItems || params.max ? ', "aria-disabled": $component.isDisabled($data)' : '') + ' }')
 
         if (!itemTemplate) {
           itemTemplate = [document.createElement('span')]
@@ -311,6 +311,11 @@
             } else {
               return items.filter(predicate)
             }
+          },
+
+          isDisabled: function(item) {
+            return (params.disabledItems && ko.unwrap(params.disabledItems).indexOf(item) !== -1)
+                || (params.max && selected().length >= ko.unwrap(params.max) && selected().indexOf(item) === -1)
           },
 
           dispose: function() {

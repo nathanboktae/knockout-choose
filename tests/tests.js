@@ -442,6 +442,91 @@ describe('knockout choose', function() {
       click('li:first-child')
       selected().should.deep.equal(multiple ? [jane] : jane)
     })
+
+    m && describe('max', function() {
+      it('should disable unselected items when the maxiumum is reached', function() {
+        testSetup('options: options, selected: selected, max: max', {
+          options: people,
+          selected: selected,
+          max: ko.observable(3)
+        }, nameTemplates)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, null, null, null, null])
+
+        click('li:nth-child(4)')
+        click('li:first-child')
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, null, null, null, null])
+
+        click('li:nth-child(2)')
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, 'true', null, 'true', 'true'])
+      })
+
+      it('should disable unselected items initially if at or over the maxiumum', function() {
+        selected = ko.observableArray([dwane, jane, people()[0], people()[4]])
+        testSetup('options: options, selected: selected, max: 3', {
+          options: people,
+          selected: selected
+        }, nameTemplates)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, 'true', null, null, 'true'])
+
+        selected([dwane, jane, people()[4]])
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', null, null, 'true'])
+      })
+
+      it('should re-enable items after an item is deselected', function() {
+        selected = ko.observableArray([dwane, jane])
+        testSetup('options: options, selected: selected, max: 2', {
+          options: people,
+          selected: selected
+        }, nameTemplates)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', null, 'true', 'true'])
+        click('li:nth-child(2)')
+
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, null, null, null, null])
+      })
+
+      it('should re-enable items if the maxiumum changes when it is an observable', function() {
+        selected = ko.observableArray([dwane, jane])
+        var max = ko.observable(2)
+        testSetup('options: options, selected: selected, max: max', {
+          options: people,
+          selected: selected,
+          max: max
+        }, nameTemplates)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', null, 'true', 'true'])
+
+        max(4)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal([null, null, null, null, null, null])
+      })
+
+      it('should work in tandem with disabled items', function() {
+        selected = ko.observableArray([dwane, jane])
+        var disabledItems = ko.observableArray([dwane, people()[0]])
+        testSetup('options: options, selected: selected, max: 3, disabledItems: disabledItems', {
+          options: people,
+          selected: selected,
+          disabledItems: disabledItems
+        }, nameTemplates)
+
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, null, 'true', null, null])
+
+        click('li:nth-child(5)')
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', 'true', null, 'true'])
+
+        click('li:first-child')
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', 'true', null, 'true'])
+
+        disabledItems([people()[0]])
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, 'true', null, null, 'true'])
+
+        click('li:nth-child(2)')
+        attributesFor('li', 'aria-disabled').should.deep.equal(['true', null, null, null, null, null])
+      })
+    })
   })
   })
 
