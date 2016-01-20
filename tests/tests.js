@@ -259,6 +259,15 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('Jane - 25, Bob - 31')
     })
 
+    m && it('should not fail if an item is removed from selection during the click', function() {
+      selected(['Jane', 'Bob'])
+      testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
+        '<choose-match><span data-bind="text: $root.namesAndAges($component.selected)"></span></choose-match>\
+        <choose-item><span data-bind="text: name, click: function() { $root.options.remove($data) }"></span></choose-item>')
+
+      click('.choose-dropdown li:nth-child(2) span')
+    })
+
     it('should use the visible binding if knockout-css3-animation is not available', function() {
       var animationBinding = ko.bindingHandlers.animation
       delete ko.bindingHandlers.animation

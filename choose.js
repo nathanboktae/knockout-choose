@@ -201,7 +201,10 @@
         }
 
         chooseEl.addEventListener('selection-changed', function(e) {
-          select(ko.contextFor(e.added || e.removed || e.selection).$data)
+          var ctx = ko.contextFor(e.added || e.removed || e.selection)
+          if (ctx) {
+            select(ctx.$data)
+          }
         })
 
         chooseEl.addEventListener('keydown', function(e) {
