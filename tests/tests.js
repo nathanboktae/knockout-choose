@@ -211,6 +211,16 @@ describe('knockout choose', function() {
       matchEl.textContent.should.equal('Jane - 25')
     })
 
+    !m && it('should initialize the selection to the first choice matching the selectProperty when falsy', function() {
+      selected(undefined)
+      people()[0].eyeColor = null
+      people()[5].eyeColor = undefined
+      testSetup('options: options, selected: selected, selectProperty: \'eyeColor\'', null,
+        '<choose-match><span data-bind="text: $data ? $data.name + \' - \' + $data.age : \'nobody\'"></span></choose-match>\
+        <choose-item><span data-bind="text: name + \' - \' + age"></span></choose-item>')
+      matchEl.textContent.should.equal('Tori - 27')
+    })
+
     m && it('should update the value to an array of properties of selectProperty if specified', function() {
       testSetup('options: options, selected: selected, selectProperty: \'name\'', null,
         '<choose-match><span data-bind="text: $root.namesAndAges($component.selected)"></span></choose-match>\

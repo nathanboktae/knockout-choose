@@ -106,11 +106,9 @@
             }
             selected = ko.observableArray(initialSelected)
           } else {
-            if (initalSelectValue) {
-              initialSelected = options().filter(function(o) {
-                return o[params.selectProperty] === initalSelectValue
-              })[0]
-            }
+            initialSelected = options().filter(function(o) {
+              return o[params.selectProperty] === initalSelectValue
+            })[0]
             selected = ko.observable(initialSelected)
           }
         }
