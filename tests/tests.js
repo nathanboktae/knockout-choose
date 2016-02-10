@@ -278,6 +278,16 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(2) span')
     })
 
+    m && it('should unshift rather than push new items if requested', function() {
+      testSetup('options: options, selected: selected, unshift: true', { selected: selected, options: colors })
+
+      click('.choose-dropdown li:nth-child(2)')
+      selected().should.deep.equal(['brown'])
+
+      click('.choose-dropdown li:nth-child(1)')
+      selected().should.deep.equal(['blue', 'brown'])
+    })
+
     it('should use the visible binding if knockout-css3-animation is not available', function() {
       var animationBinding = ko.bindingHandlers.animation
       delete ko.bindingHandlers.animation

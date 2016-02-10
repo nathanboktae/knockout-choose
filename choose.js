@@ -184,7 +184,7 @@
 
           if (params.multiple) {
             var idx = selected().indexOf(item)
-            idx === -1 ? selected.push(item) : selected.splice(idx, 1)
+            idx === -1 ? selected[ko.unwrap(params.unshift) ? 'unshift' : 'push'](item) : selected.splice(idx, 1)
             if (params.selectProperty) {
               params.selected(selected().map(function(i) { return i[params.selectProperty] }))
             }
