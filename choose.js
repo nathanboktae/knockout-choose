@@ -206,7 +206,7 @@
         })
 
         chooseEl.addEventListener('keydown', function(e) {
-          var code = e.code || e.keyCode || e.which,
+          var code = e.keyCode || e.which,
               isInput = e.target.tagName === 'INPUT' || e.target === chooseEl,
               isOption = e.target.getAttribute('role') === 'option',
               firstOption

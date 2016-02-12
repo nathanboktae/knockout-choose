@@ -1,6 +1,6 @@
 {
   "name": "knockout-chooose",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "A lightweight and powerful select alternative to let users choose items from many options",
   "main": "choose.js",
   "devDependencies": {
