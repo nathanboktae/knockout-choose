@@ -209,10 +209,10 @@
           var code = e.keyCode || e.which,
               isInput = e.target.tagName === 'INPUT' || e.target === chooseEl,
               isOption = e.target.getAttribute('role') === 'option',
+              handle = function() { e.preventDefault(); e.stopPropagation() },
               firstOption
-          if (code === 38 /*up arrow*/) {
-            e.preventDefault()
-            e.stopPropagation()
+          if (code === 38 /* up arrow */) {
+            handle()
             if (isInput) {
               var options = chooseEl.querySelectorAll('[role="option"]')
               if (options.length) {
@@ -223,8 +223,7 @@
               chooseEl.focus()
             }
           } else if (code === 40 /* down arrow */) {
-            e.preventDefault()
-            e.stopPropagation()
+            handle()
             if (isInput) {
               firstOption = chooseEl.querySelector('[role="option"]')
               if (firstOption) {
@@ -239,6 +238,10 @@
             if (firstOption) {
               select(ko.contextFor(firstOption).$data)
             }
+          } else if (code === 27 /* escape */) {
+            handle()
+            searchTerm(null)
+            dropdownVisible(false)
           }
         })
 

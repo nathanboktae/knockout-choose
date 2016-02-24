@@ -36,6 +36,7 @@ describe('knockout choose', function() {
   dispatchEvent = function(cls, type, moreInit, el) {
     var evt = document.createEvent(cls)
     evt.initEvent(type, true, true)
+    el = el || testEl
     if (typeof el === 'string') {
       el = testEl.querySelector(el)
     }
@@ -183,6 +184,22 @@ describe('knockout choose', function() {
       click('.choose-dropdown li:nth-child(1)')
       selected().should.equal('blue')
       matchEl.textContent.should.equal('blue')
+    })
+
+    !m && it('should close the dropdown when escape is pressed', function() {
+      testSetup('options: options, selected: selected, showSearch: true', { selected: selected, options: colors })
+
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+
+      keydown(null, 27 /* enter */)
+      testEl.should.not.have.class('choose-dropdown-open')
+
+      click(matchEl)
+      testEl.should.have.class('choose-dropdown-open')
+
+      keydown('input', 27 /* enter */)
+      testEl.should.not.have.class('choose-dropdown-open')
     })
 
     !m && it('should update the value to the property of selectProperty if specified', function() {
