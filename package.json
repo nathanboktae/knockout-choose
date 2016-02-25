@@ -11,12 +11,12 @@
     "grunt-saucelabs": "^8.6.1",
     "knockout-css3-animation": "^0.1.1",
     "mocha": "^2.2.5",
-    "mocha-phantomjs": "^4.0.0",
+    "mocha-phantomjs-core": "^2.0.0",
     "sinon-browser-only": "^1.12.1",
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "test": "npm install knockout@3.3.0 && mocha-phantomjs tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
+    "test": "npm install knockout@3.3.0 && ./slimerjs/slimerjs ./node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
   },
   "keywords": [
     "select",

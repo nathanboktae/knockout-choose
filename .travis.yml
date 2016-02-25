@@ -1,9 +1,17 @@
 language: node_js
 sudo: false
 node_js:
-- 0.12
+- 4
+addons:
+  firefox: "44"
+
 env:
   global:
-  - SAUCE_USERNAME=knockout-choose
   - secure: Cotw7QKwjtdQeTsotABz4aPGUIYLlyq6apjTFVeJ7w8BbhW0rf4Zwkw2xKH1sC7p/Ds0PeASN0LoFnazQf7HUASbXlbwrt+tb7Y9nsts2JasnyyTXh4gOmxYIXhvoDaPcMavDOp/eXJpCW1UEn5QGGg2WuVkcVsZ5qN21YD32BwTbtDfcvOOmspZSi9EmnaS0Q9kYI2jfcxcgrOVrHnB+WE1iJuKZ+nFqj8Dnu10I+VGm6JTiX1JlGrh19BE3p4ThB1NZCMyKeJ9NJc6nq40kEsITWRu6FaCOh72EorrQCJuyX2fk34jVIGXutiRXi6G05n5Aijoxgr/9XendBBIhO93j5sOvxpA47qcjicAPJrKSE6B5g7VLoKspx4xQ8Izl7HB5Rh2IQy3Bxp8HDwlZemnYIhjFOIwrcIk7rjPobnEcrNJeN5xCZ52DHft5cLdgbkdrMGsuam9/t8Ane39MHLqG7cysjGHRpw02Wf2EkLxqwq5L6Wc665QwGQ94KXQyzoBlXHcDqXNF9SAzT0/SmDgTq6FbP2jEK+ZlaHGFpLY0UnWLPfikiL/9uF70kfg268tQFk10eM9eXrnO80Cs6SJDml6jfZfzvGx1W1dwTHOPfjx0fiVd4kv23xOuQHYstjW2e5oCFTh4MyNI6S/17jIvdgmjhXKoZU5aD7th6U=
-script: npm test
+  matrix:
+  - SAUCE_USERNAME=knockout-choose SLIMERJSLAUNCHER=$(which firefox) DISPLAY=:99.0
+
+before_script:
+  - sh -e /etc/init.d/xvfb start
+  - "git clone --depth=1 https://github.com/laurentj/slimerjs.git tmp; mv ./tmp/src ./slimerjs"
+  - echo $SLIMERJSLAUNCHER
