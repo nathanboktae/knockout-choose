@@ -3,7 +3,7 @@ sudo: false
 node_js:
 - 4
 addons:
-  firefox: "44"
+  firefox: "43.0"
 
 env:
   global:
