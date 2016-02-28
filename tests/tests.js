@@ -813,7 +813,7 @@ describe('knockout choose', function() {
       document.activeElement.should.have.text('red')
     })
 
-    it('should focus the searchbox when the choose element is focused', function(done) {
+    it('should focus the searchbox when the choose element is focused', !window.callPhantom && function(done) {
       searchTestSetup('options: options, selected: selected, showSearch: true', {
         options: colors,
         selected: selected
@@ -852,7 +852,7 @@ describe('knockout choose', function() {
       document.activeElement.should.have.text('blue')
     })
 
-    it('should focus the searchbox when arrow up is pressed on the top item', function(done) {
+    it('should focus the searchbox when arrow up is pressed on the top item', !window.callPhantom && function(done) {
       searchTestSetup('options: options, selected: selected, showSearch: true', {
         options: colors,
         selected: selected
@@ -867,7 +867,7 @@ describe('knockout choose', function() {
       }, 150)
     })
 
-    it('should focus the searchbox when arrow down is pressed on the last item', function(done) {
+    it('should focus the searchbox when arrow down is pressed on the last item', !window.callPhantom && function(done) {
       searchTestSetup('options: options, selected: selected, showSearch: true', {
         options: colors,
         selected: selected
