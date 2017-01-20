@@ -23,7 +23,9 @@
 
         itemLi.setAttribute('role', 'option')
         itemLi.setAttribute('data-bind', 'event: { blur: $component.closeOnBlur }, attr: { "aria-selected": ' +
-          (params.multiple ? '$component.selected().indexOf($data) !== -1 }' : '$data === $component.selected() }'))
+          (params.multiple ? '$component.selected().indexOf($data) !== -1' : '$data === $component.selected()') +
+          (params.disabledItems || params.max ? ', "aria-disabled": $component.isDisabled($data)' : '') + ' }')
+
         if (!itemTemplate) {
           itemTemplate = [document.createElement('span')]
           itemTemplate[0].setAttribute('data-bind', 'text: $data')
@@ -104,11 +106,9 @@
             }
             selected = ko.observableArray(initialSelected)
           } else {
-            if (initalSelectValue) {
-              initialSelected = options().filter(function(o) {
-                return o[params.selectProperty] === initalSelectValue
-              })[0]
-            }
+            initialSelected = options().filter(function(o) {
+              return o[params.selectProperty] === initalSelectValue
+            })[0]
             selected = ko.observable(initialSelected)
           }
         }
@@ -122,20 +122,30 @@
         if (!chooseEl.attributes.tabindex) {
           chooseEl.setAttribute('tabindex', '0')
         }
+        var pendingBlur = false
         chooseEl.addEventListener('focus', function(e) {
           if (ko.unwrap(params.disabled)) return
-          if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
+          if (!dropdownVisible()) {
             lastFocusedAt = new Date()
           }
+          pendingBlur = false
           dropdownVisible(true)
           setTimeout(function() {
             chooseEl.querySelector('[name="choose-search"]').focus()
-          }, 20)
+            pendingBlur = false
+          }, 10)
         })
 
         var closeOnBlur = function(_, e) {
           if (!e.relatedTarget || !chooseEl.contains(e.relatedTarget)) {
-            dropdownVisible(false)
+            // unfortunately due to poor browser support of relatedTarget, we need to delay this to see if
+            // the focus really was one of our elements
+            pendingBlur = true
+            setTimeout(function() {
+              if (pendingBlur) {
+                dropdownVisible(false)
+              }
+            }, 20)
           }
         }
         chooseEl.addEventListener('blur', closeOnBlur.bind(null, null))
@@ -170,9 +180,11 @@
 
         function select(item) {
           if (ko.unwrap(params.disabled)) return
+          if (params.disabledItems && ko.unwrap(params.disabledItems).indexOf(item) !== -1) return
+
           if (params.multiple) {
             var idx = selected().indexOf(item)
-            idx === -1 ? selected.push(item) : selected.splice(idx, 1)
+            idx === -1 ? selected[ko.unwrap(params.unshift) ? 'unshift' : 'push'](item) : selected.splice(idx, 1)
             if (params.selectProperty) {
               params.selected(selected().map(function(i) { return i[params.selectProperty] }))
             }
@@ -187,17 +199,20 @@
         }
 
         chooseEl.addEventListener('selection-changed', function(e) {
-          select(ko.contextFor(e.added || e.removed || e.selection).$data)
+          var ctx = ko.contextFor(e.added || e.removed || e.selection)
+          if (ctx) {
+            select(ctx.$data)
+          }
         })
 
         chooseEl.addEventListener('keydown', function(e) {
-          var code = e.code || e.keyCode || e.which,
+          var code = e.keyCode || e.which,
               isInput = e.target.tagName === 'INPUT' || e.target === chooseEl,
               isOption = e.target.getAttribute('role') === 'option',
+              handle = function() { e.preventDefault(); e.stopPropagation() },
               firstOption
-          if (code === 38 /*up arrow*/) {
-            e.preventDefault()
-            e.stopPropagation()
+          if (code === 38 /* up arrow */) {
+            handle()
             if (isInput) {
               var options = chooseEl.querySelectorAll('[role="option"]')
               if (options.length) {
@@ -208,8 +223,7 @@
               chooseEl.focus()
             }
           } else if (code === 40 /* down arrow */) {
-            e.preventDefault()
-            e.stopPropagation()
+            handle()
             if (isInput) {
               firstOption = chooseEl.querySelector('[role="option"]')
               if (firstOption) {
@@ -221,7 +235,13 @@
             }
           } else if (code === 13 && isInput) {
             firstOption = chooseEl.querySelector('[role="option"]')
-            select(ko.contextFor(firstOption).$data)
+            if (firstOption) {
+              select(ko.contextFor(firstOption).$data)
+            }
+          } else if (code === 27 /* escape */) {
+            handle()
+            searchTerm(null)
+            dropdownVisible(false)
           }
         })
 
@@ -235,6 +255,7 @@
           placeholder: params.placeholder || 'Choose...',
           searchPlaceholder: params.searchPlaceholder,
           closeOnBlur: closeOnBlur,
+          disabledItems: params.disabledItems,
 
           toggleDropdown: function() {
             if (ko.unwrap(params.disabled)) return
@@ -294,6 +315,11 @@
             } else {
               return items.filter(predicate)
             }
+          },
+
+          isDisabled: function(item) {
+            return (params.disabledItems && ko.unwrap(params.disabledItems).indexOf(item) !== -1)
+                || (params.max && selected().length >= ko.unwrap(params.max) && selected().indexOf(item) === -1)
           },
 
           dispose: function() {

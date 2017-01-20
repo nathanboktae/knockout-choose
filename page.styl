@@ -155,8 +155,13 @@ choose
         text-color text-color
       &:focus
         background-color header-color
-      &:hover
+      &:hover:not([aria-disabled="true"])
         background-color accent-color
+      &[aria-disabled="true"]
+        tooltip
+          display none
+        cursor not-allowed
+        opacity 0.5
 
 choose.multiple
   min-width 150px
@@ -178,3 +183,77 @@ choose.multiple
       opacity 0
     &[aria-selected="true"]::before
       opacity 1
+
+choose.radio, choose.tabs
+  display block
+  margin-bottom 10px
+  &, &:not(.choose-dropdown-open):hover, &:not(.choose-dropdown-open):focus
+    box-shadow none
+  &.choose-dropdown-open
+    background none
+  .choose-match
+    display none
+  .choose-dropdown
+    display block
+    position static
+    overflow visible
+    > ul
+      display flex
+      align-items flex-start
+      background none
+      animation none
+      //max-height initial
+      overflow-y visible
+      li
+        position relative
+        overflow visible
+        color text-color
+        cursor pointer
+        line-height 21px
+
+choose.radio .choose-dropdown > ul
+  li
+    size = 14px
+    padding-left size*1.8
+    &::before, &::after
+      content ' '
+      position absolute
+      border-radius size
+      width size
+      height size
+      left 2px
+      top "calc(50% - %s)" % (size/2)
+      border 1px solid header-color
+      transition all 100ms linear
+    &::before
+      background-color white
+      background-image none, linear-gradient(to bottom, white, backg-color)
+    &::after
+      border-color transparent
+      transform scale(0.4)
+      z-index 1
+    &:hover:not([aria-disabled="true"]), &:focus
+      background none
+      color text-color
+    &:hover::before
+      background-color-color alpha(header-color, 0.2)
+    &:focus::before
+      border-color alpha(text-color, 0.8)
+    &[aria-selected="true"]::after
+      background-color header-color
+
+choose.tabs .choose-dropdown > ul
+  li
+    border-top 2px solid header-color
+    border-left 1px solid header-color
+    border-bottom 1px solid header-color
+    border-top-left-radius 4px
+    border-top-right-radius 4px
+    &:first-of-type
+      border-left-width 2px
+    &:last-of-type
+      border-right 2px solid header-color
+    &:hover:not([aria-disabled="true"]), &:focus
+      background-color alpha(accent-color, 0.3)
+    &[aria-selected="true"]
+      background-color alpha(accent-color, 0.5)
