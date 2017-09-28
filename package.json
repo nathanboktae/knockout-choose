@@ -1,5 +1,5 @@
 {
-  "name": "knockout-chooose",
+  "name": "knockout-choose",
   "version": "0.6.5",
   "description": "A lightweight and powerful select alternative to let users choose items from many options",
   "main": "choose.js",
@@ -17,6 +17,13 @@
   },
   "scripts": {
     "test": "npm install knockout@3.3.0 && ./slimerjs/slimerjs ./node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js tests/tests.html && (node -e \"require('grunt').tasks(['test']);\" || true)"
+  },
+"repository": {
+    "type": "git",
+    "url": "https://github.com/nathanboktae/knockout-choose.git"
+  },
+  "bugs": {
+    "url": "http://github.com/nathanboktae/knockout-choose/issues"
   },
   "keywords": [
     "select",
